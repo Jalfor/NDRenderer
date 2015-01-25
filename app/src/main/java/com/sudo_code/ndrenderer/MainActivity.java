@@ -8,7 +8,6 @@ import com.google.vrtoolkit.cardboard.Viewport;
 
 import android.content.Context;
 import android.opengl.GLES30;
-import android.opengl.GLES30;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
@@ -69,6 +68,12 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glViewport(0, 0, width, height);
     }
 
+    /**
+     * Initialization code
+     *
+     * @param config The EGL configuration used when creating the surface.
+     */
+
     @Override
     public void onSurfaceCreated(EGLConfig config) {
         Log.i(TAG, "onSurfaceCreated");
@@ -80,6 +85,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         shaders[1] = GLUtils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.frag, this);
 
         program = GLUtils.genProgram(shaders);
+        GLUtils.delShaders(shaders);
 
         triangleVBO = GLUtils.genVBO(vertexData);
 
