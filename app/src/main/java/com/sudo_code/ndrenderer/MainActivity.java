@@ -14,9 +14,7 @@ import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
-/**
- * A Cardboard sample application.
- */
+
 public class MainActivity extends CardboardActivity implements CardboardView.StereoRenderer {
 
     private static final String TAG = "MainActivity";
@@ -81,15 +79,15 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         int[] shaders = new int[2];
 
-        shaders[0] = GLUtils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.vert, this);
-        shaders[1] = GLUtils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.frag, this);
+        shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.vert, this);
+        shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.frag, this);
 
-        program = GLUtils.genProgram(shaders);
-        GLUtils.delShaders(shaders);
+        program = Utils.genProgram(shaders);
+        Utils.delShaders(shaders);
 
-        triangleVBO = GLUtils.genVBO(vertexData);
+        triangleVBO = Utils.genVBO(vertexData);
 
-        GLUtils.checkGLError("onSurfaceCreated");
+        Utils.checkGLError("onSurfaceCreated");
     }
 
     /**
