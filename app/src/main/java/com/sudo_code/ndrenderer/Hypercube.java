@@ -4,10 +4,11 @@ import android.opengl.*;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 
 public class Hypercube {
-    private int mDimensions;
+
+    private int     mDimensions;
     private float[] mVertices;  //In the form x,y,z,w...x,y etc.
     private float[] mNormals;
-    private int[] mIndices;
+    private int[]   mIndices;
 
     /**
      * Initializes the hypercube, generating the vertices
@@ -95,9 +96,9 @@ public class Hypercube {
         mVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
                                      Utils.powI(2, mDimensions - 2) * 4) * mDimensions];
 
-        //4 * number of faces vertices, each with mDimensions components
+        //4 * number of faces vertices, each with 3 components  (normals of the 3D projection)
         mNormals = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
-                                    Utils.powI(2, mDimensions - 2) * 4) * mDimensions];
+                                    Utils.powI(2, mDimensions - 2) * 4) * 3];
 
         //6 * number of faces vertices (2 triangles per face * 3 points per triangle)
         mIndices = new int[(int) CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
