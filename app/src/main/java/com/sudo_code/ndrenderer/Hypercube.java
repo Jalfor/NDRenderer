@@ -3,6 +3,9 @@ package com.sudo_code.ndrenderer;
 import android.opengl.*;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 
+import java.util.Arrays;
+import java.util.Vector;
+
 public class Hypercube {
 
     private int     mDimensions;
@@ -13,9 +16,9 @@ public class Hypercube {
     /**
      * Initializes the hypercube, generating the vertices
      */
-    public Hypercube(int dimensions) {
+    public Hypercube(int dimensions, float projectionConstant) {
         mDimensions = dimensions;
-        genVertices();
+        genVertices(projectionConstant);
     }
 
     /**
@@ -91,7 +94,32 @@ public class Hypercube {
         return unlockedAxes;
     }
 
-    private void genVertices() {
+    /**
+     * Calculates the surface normal to a polygon based on a triangle formed of its first 3 vertices
+     *
+     * @param faceVertices The N-Dimensional vertices comprising a face (anything after the first 3 will be ignored)
+     * @return The surface normal, normalized
+     */
+    private float[] get3dSurfaceNormal(float[] faceVertices, float projectionConstant) {
+        float[][] triVertices3d = new float[mDimensions][3];
+
+        for (int i = 0; i < faceVertices.length / mDimensions; i++) {
+            float[] vertex = Arrays.copyOfRange(faceVertices, i, i + mDimensions);
+            System.arraycopy(
+                    Utils.projectTo3D(vertex, projectionConstant),
+                    0,
+                    triVertices3d[i],
+                    i,
+                    3);
+        }
+
+        float[] vector1 = NDVector.sub(triVertices3d[0], triVertices3d[1]);
+        float[] vector2 = NDVector.sub(triVertices3d[1], triVertices3d[2]);
+
+        return NDVector.normalize(NDVector.cross(vector1, vector2));
+    }
+
+    private void genVertices(float projectionConstant) {
         //4 * number of faces vertices, each with mDimensions components
         mVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
                                      Utils.powI(2, mDimensions - 2) * 4) * mDimensions];
@@ -149,12 +177,31 @@ public class Hypercube {
                 mIndices[indexFaceStartI + 3] = vertFaceStartI + 1;
                 mIndices[indexFaceStartI + 4] = vertFaceStartI + 2;
                 mIndices[indexFaceStartI + 5] = vertFaceStartI + 3;
+/*
+                float[] vertices3d =
+                        Utils.projectTo3D(
+                                Arrays.copyOfRange( //Grab the ND vertex
+                                        mVertices,
+                                        indexFaceStartI,
+                                        indexFaceStartI + mDimensions),
+                                projectionConstant);
+*/
 
-                //System.arraycopy(mVertices, vertFaceStartI * 3);
+                /*System.arraycopy(
+                        Utils.projectTo3D(
+                                Arrays.copyOfRange( //Grab the ND vertex
+                                        mVertices,
+                                        indexFaceStartI,
+                                        indexFaceStartI + mDimensions),
+                                projectionConstant),
+                        0,
+                        mNormals,
+                        vertFaceStartI * 3,
+                        3);
 
                 vertFaceStartI += 4;
                 indexFaceStartI += 6;
-
+                */
             } while (nextLockedAxesValues(lockedAxesValues));
         } while (nextLockedAxes(lockedAxes));
     }
