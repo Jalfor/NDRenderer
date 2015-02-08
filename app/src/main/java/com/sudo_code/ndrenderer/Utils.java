@@ -21,13 +21,29 @@ class Utils {
      * Projects a vertex down a dimension
      *
      * @param vertex The vertex to be projected
-     * @param projectionConstant The camera's distance to the hypervolume of projection (MUST BE SMALLER THAN GREATEST EXTENT OF SHAPE)
+     * @param projectionConstant The camera's distance to the hypervolume of projection (MUST BE GREATER THAN GREATEST EXTENT OF SHAPE)
      */
-    float[] projectDown(float[] vertex, float projectionConstant) {
+    public static float[] projectDown(float[] vertex, float projectionConstant) {
         float[] projVertex = new float[vertex.length - 1];
 
         for (int i = 0; i < vertex.length - 1; i++) {
             projVertex[i] = vertex[i] * (projectionConstant / (projectionConstant +  vertex[vertex.length - 1]));
+        }
+
+        return projVertex;
+    }
+
+    /**
+     * Projects a vertex down to 3D
+     *
+     * @param vertex The vertex to be projected
+     * @param projectionConstant The camera's distance to the hypervolume of projection (MUST BE GREATER THAN GREATEST EXTENT OF SHAPE)
+     */
+    public static float[] projectTo3D(float[] vertex, float projectionConstant) {
+        float[] projVertex = vertex.clone();
+
+        while (projVertex.length > 3) {
+            projVertex = projectDown(projVertex, projectionConstant);
         }
 
         return projVertex;

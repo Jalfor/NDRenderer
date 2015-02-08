@@ -142,8 +142,6 @@ public class Hypercube {
                 mVertices[(vertFaceStartI + 3) * mDimensions + unlockedAxes[0]] = 1.f;
                 mVertices[(vertFaceStartI + 3) * mDimensions + unlockedAxes[1]] = -1.f;
 
-                //mNormals[]
-
                 mIndices[indexFaceStartI + 0] = vertFaceStartI + 0;
                 mIndices[indexFaceStartI + 1] = vertFaceStartI + 1;
                 mIndices[indexFaceStartI + 2] = vertFaceStartI + 3;
@@ -152,6 +150,7 @@ public class Hypercube {
                 mIndices[indexFaceStartI + 4] = vertFaceStartI + 2;
                 mIndices[indexFaceStartI + 5] = vertFaceStartI + 3;
 
+                //System.arraycopy(mVertices, vertFaceStartI * 3);
 
                 vertFaceStartI += 4;
                 indexFaceStartI += 6;
