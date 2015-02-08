@@ -18,6 +18,22 @@ class Utils {
     private static final int BYTES_PER_FLOAT = 4;
 
     /**
+     * Projects a vertex down a dimension
+     *
+     * @param vertex The vertex to be projected
+     * @param projectionConstant The camera's distance to the hypervolume of projection (MUST BE SMALLER THAN GREATEST EXTENT OF SHAPE)
+     */
+    float[] projectDown(float[] vertex, float projectionConstant) {
+        float[] projVertex = new float[vertex.length - 1];
+
+        for (int i = 0; i < vertex.length - 1; i++) {
+            projVertex[i] = vertex[i] * (projectionConstant / (projectionConstant +  vertex[vertex.length - 1]));
+        }
+
+        return projVertex;
+    }
+
+    /**
      * Integer exponentiation by squaring
      *
      * @param base Base of exponentiation
