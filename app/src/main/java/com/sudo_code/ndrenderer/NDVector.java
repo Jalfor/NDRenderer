@@ -3,7 +3,7 @@ package com.sudo_code.ndrenderer;
 public class NDVector {
 
     /**
-     * Calculates the cross product between a and b
+     * Calculates the cross product between two 3D vectors, a and b
      *
      * @param vector1 The first vector
      * @param vector2 The second vector
@@ -54,6 +54,23 @@ public class NDVector {
 
         for (int i = 0; i < result.length; i++) {
             result[i] *= scalar;
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculates the vector1 - vector2
+     *
+     * @param vector1 The first vector
+     * @param vector2 The second vector
+     * @return vector1 - vector2
+     */
+    public static float[] sub(float[] vector1, float[] vector2) {
+        float[] result = new float[vector1.length];
+
+        for (int i = 0; i < vector1.length; i++) {
+            result[i] = vector1[i] - vector2[i];
         }
 
         return result;
