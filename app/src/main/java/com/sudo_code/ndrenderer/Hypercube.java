@@ -18,7 +18,7 @@ public class Hypercube {
      */
     public Hypercube(int dimensions, float projectionConstant) {
         mDimensions = dimensions;
-        genVertices(projectionConstant);
+        genVertexData(projectionConstant);
     }
 
     /**
@@ -119,7 +119,7 @@ public class Hypercube {
         return NDVector.normalize(NDVector.cross(vector1, vector2));
     }
 
-    private void genVertices(float projectionConstant) {
+    private void genVertexData(float projectionConstant) {
         //4 * number of faces vertices, each with mDimensions components
         mVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
                                      Utils.powI(2, mDimensions - 2) * 4) * mDimensions];
@@ -177,31 +177,22 @@ public class Hypercube {
                 mIndices[indexFaceStartI + 3] = vertFaceStartI + 1;
                 mIndices[indexFaceStartI + 4] = vertFaceStartI + 2;
                 mIndices[indexFaceStartI + 5] = vertFaceStartI + 3;
-/*
-                float[] vertices3d =
-                        Utils.projectTo3D(
-                                Arrays.copyOfRange( //Grab the ND vertex
-                                        mVertices,
-                                        indexFaceStartI,
-                                        indexFaceStartI + mDimensions),
-                                projectionConstant);
-*/
 
-                /*System.arraycopy(
-                        Utils.projectTo3D(
-                                Arrays.copyOfRange( //Grab the ND vertex
-                                        mVertices,
-                                        indexFaceStartI,
-                                        indexFaceStartI + mDimensions),
-                                projectionConstant),
-                        0,
-                        mNormals,
-                        vertFaceStartI * 3,
-                        3);
+                float[] surfaceNormal = get3dSurfaceNormal(
+                        Arrays.copyOfRange(
+                                mVertices,
+                                vertFaceStartI * mDimensions,
+                                vertFaceStartI * mDimensions + 3),
+                        projectionConstant);
+
+                //Loop through vertices
+                for (int i = vertFaceStartI; i < vertFaceStartI + 1; i++) {
+                    mNormals[i * 3] = surfaceNormal[i * mDimensions];
+                }
 
                 vertFaceStartI += 4;
                 indexFaceStartI += 6;
-                */
+
             } while (nextLockedAxesValues(lockedAxesValues));
         } while (nextLockedAxes(lockedAxes));
     }
