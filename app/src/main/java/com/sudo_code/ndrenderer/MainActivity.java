@@ -12,6 +12,10 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+
 import javax.microedition.khronos.egl.EGLConfig;
 
 
@@ -27,6 +31,9 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
     private int program;
     private int[] triangleVBO = new int[1];
+    private IntBuffer vao = ByteBuffer.allocateDirect(4)
+            .order(ByteOrder.nativeOrder())
+            .asIntBuffer();
 
     private final float[] vertexData =
             {
@@ -87,6 +94,19 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         triangleVBO = Utils.genVBO(vertexData);
 
+        GLES30.glGenVertexArrays(1, vao);
+        GLES30.glBindVertexArray(vao.get(0));
+
+        GLES30.glEnableVertexAttribArray(mPositionHandle);
+        GLES30.glEnableVertexAttribArray(mColorHandle);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, triangleVBO[0]);
+        GLES30.glVertexAttribPointer(mPositionHandle, 4, GLES30.GL_FLOAT, false, 0, 0);
+        GLES30.glVertexAttribPointer(mColorHandle, 4, GLES30.GL_FLOAT, false, 0, 48);
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+
+        GLES30.glBindVertexArray(0);
+
         Utils.checkGLError("onSurfaceCreated");
     }
 
@@ -110,19 +130,11 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         GLES30.glUseProgram(program);
-
-        GLES30.glEnableVertexAttribArray(mPositionHandle);  //TODO: Move into VAO
-        GLES30.glEnableVertexAttribArray(mColorHandle);
-
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, triangleVBO[0]);
-        GLES30.glVertexAttribPointer(mPositionHandle, 4, GLES30.GL_FLOAT, false, 0, 0);
-        GLES30.glVertexAttribPointer(mColorHandle, 4, GLES30.GL_FLOAT, false, 0, 48);
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+        GLES30.glBindVertexArray(vao.get(0));
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 3);
 
-        GLES30.glDisableVertexAttribArray(mPositionHandle);
-        GLES30.glDisableVertexAttribArray(mColorHandle);
+        GLES30.glBindVertexArray(0);
         GLES30.glUseProgram(0);
     }
 
