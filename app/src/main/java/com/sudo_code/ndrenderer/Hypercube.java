@@ -10,7 +10,7 @@ public class Hypercube {
 
     private int     mDimensions;
     private float[] mVertices;  //In the form x,y,z,w...x,y etc.
-    private float[] mNormals;
+    private float[] mAdjVertices;
     private int[]   mIndices;
 
     /**
@@ -94,39 +94,14 @@ public class Hypercube {
         return unlockedAxes;
     }
 
-    /**
-     * Calculates the surface normal to a polygon based on a triangle formed of its first 3 vertices
-     *
-     * @param faceVertices The N-Dimensional vertices comprising a face (anything after the first 3 will be ignored)
-     * @return The surface normal, normalized
-     */
-    private float[] get3dSurfaceNormal(float[] faceVertices, float projectionConstant) {
-        float[][] triVertices3d = new float[mDimensions][3];
-
-        for (int i = 0; i < faceVertices.length / mDimensions; i++) {
-            float[] vertex = Arrays.copyOfRange(faceVertices, i, i + mDimensions);
-            System.arraycopy(
-                    Utils.projectTo3D(vertex, projectionConstant),
-                    0,
-                    triVertices3d[i],
-                    i,
-                    3);
-        }
-
-        float[] vector1 = NDVector.sub(triVertices3d[0], triVertices3d[1]);
-        float[] vector2 = NDVector.sub(triVertices3d[1], triVertices3d[2]);
-
-        return NDVector.normalize(NDVector.cross(vector1, vector2));
-    }
-
     private void genVertexData(float projectionConstant) {
         //4 * number of faces vertices, each with mDimensions components
         mVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
                                      Utils.powI(2, mDimensions - 2) * 4) * mDimensions];
 
-        //4 * number of faces vertices, each with 3 components  (normals of the 3D projection)
-        mNormals = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
-                                    Utils.powI(2, mDimensions - 2) * 4) * 3];
+        //4 * number of faces vertices, each with mDimensions components each with 2 adjacent vertices
+        mAdjVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
+                                    Utils.powI(2, mDimensions - 2) * 4) * mDimensions * 2];
 
         //6 * number of faces vertices (2 triangles per face * 3 points per triangle)
         mIndices = new int[(int) CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
@@ -178,16 +153,20 @@ public class Hypercube {
                 mIndices[indexFaceStartI + 4] = vertFaceStartI + 2;
                 mIndices[indexFaceStartI + 5] = vertFaceStartI + 3;
 
-                float[] surfaceNormal = get3dSurfaceNormal(
-                        Arrays.copyOfRange(
-                                mVertices,
-                                vertFaceStartI * mDimensions,
-                                vertFaceStartI * mDimensions + 3),
-                        projectionConstant);
+                for (int i = 0; i < 4; i++) {
+                    System.arraycopy(   //Previous vertex
+                            mVertices,
+                            (vertFaceStartI + ((i - 1) % 4)) * mDimensions,
+                            mAdjVertices,
+                            (vertFaceStartI + i) * 2 * mDimensions,
+                            mDimensions);
 
-                //Loop through vertices
-                for (int i = vertFaceStartI; i < vertFaceStartI + 1; i++) {
-                    mNormals[i * 3] = surfaceNormal[i * mDimensions];
+                    System.arraycopy(   //Next vertex
+                            mVertices,
+                            (vertFaceStartI + ((i + 1) % 4)) * mDimensions,
+                            mAdjVertices,
+                            (vertFaceStartI + i) * 2 * mDimensions + mDimensions,
+                            mDimensions);
                 }
 
                 vertFaceStartI += 4;
