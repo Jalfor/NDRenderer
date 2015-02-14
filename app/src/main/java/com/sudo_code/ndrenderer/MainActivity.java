@@ -1,20 +1,16 @@
 package com.sudo_code.ndrenderer;
 
-import com.google.vrtoolkit.cardboard.CardboardActivity;
-import com.google.vrtoolkit.cardboard.CardboardView;
-import com.google.vrtoolkit.cardboard.Eye;
-import com.google.vrtoolkit.cardboard.HeadTransform;
-import com.google.vrtoolkit.cardboard.Viewport;
-
 import android.content.Context;
 import android.opengl.GLES30;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
+import com.google.vrtoolkit.cardboard.CardboardActivity;
+import com.google.vrtoolkit.cardboard.CardboardView;
+import com.google.vrtoolkit.cardboard.Eye;
+import com.google.vrtoolkit.cardboard.HeadTransform;
+import com.google.vrtoolkit.cardboard.Viewport;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
@@ -27,6 +23,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private CardboardOverlayView mOverlayView;
 
     private int program;
+    private int uniformBuffer;
 
     private Hypercube hypercube;
 
@@ -76,6 +73,8 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         program = Utils.genProgram(shaders);
         Utils.delShaders(shaders);
+
+
 
         hypercube = new Hypercube(4, 3, 0, 1, 2);
 

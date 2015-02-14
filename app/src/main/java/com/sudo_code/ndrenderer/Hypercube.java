@@ -1,24 +1,160 @@
 package com.sudo_code.ndrenderer;
 
-import android.opengl.*;
+import android.opengl.GLES30;
+
 import org.apache.commons.math3.util.CombinatoricsUtils;
 
-import java.util.Arrays;
-import java.util.Vector;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class Hypercube {
 
-    private int     mDimensions;
+    private final int BYTES_PER_INT = 4;
+    private final int BYTES_PER_FLOAT = 4;
+
     private float[] mVertices;  //In the form x,y,z,w...x,y etc.
-    private float[] mAdjVertices;
+    private float[] mPrevVertices;
+    private float[] mNextVertices;
     private int[]   mIndices;
 
+    FloatBuffer mNativeVertBuffer;
+    IntBuffer mNativeIndexBuffer;
+
+    private int VAO;
+    private int mVertVBO;
+    private int mIndexVBO;
+
+    private int mDimensions;
+    private int mVertexHandle;
+    private int mPrevVertexHandle;
+    private int mNextVertexHandle;
+
     /**
-     * Initializes the hypercube, generating the vertices
+     * Initializes the hypercube
+     *
+     * @param dimensions The number of dimensions the hypercube should have
+     * @param projectionConstant The camera's distance to the hypervolume of projection (MUST BE GREATER THAN 1)
+     * @param vertexHandle The attribute index of the vertex position
+     * @param prevVertexHandle The attribute index of the previous vertex's position
+     * @param nextVertexHandle The attribute index of the next vertex's position
      */
-    public Hypercube(int dimensions, float projectionConstant) {
-        mDimensions = dimensions;
+    public Hypercube(int dimensions, float projectionConstant, int vertexHandle, int prevVertexHandle, int nextVertexHandle) {
+        mDimensions       = dimensions;
+        mVertexHandle     = vertexHandle;
+        mPrevVertexHandle = prevVertexHandle;
+        mNextVertexHandle = nextVertexHandle;
+
         genVertexData(projectionConstant);
+        genNativeBuffers();
+        genVBOs();
+        genVAO();
+        initVAO();
+    }
+
+    /**
+     * Generates two native buffers from the Java arrays, one containing the vertex data and the
+     * other containing the draw indices
+     */
+    private void genNativeBuffers() {
+        mNativeVertBuffer = ByteBuffer.allocateDirect(
+                (mVertices.length + mPrevVertices.length + mNextVertices.length) * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+
+        mNativeIndexBuffer = ByteBuffer.allocateDirect(
+                (mIndices.length) * BYTES_PER_INT)
+                .order(ByteOrder.nativeOrder())
+                .asIntBuffer();
+
+        mNativeVertBuffer.put(mVertices);
+        mNativeVertBuffer.put(mPrevVertices);
+        mNativeVertBuffer.put(mNextVertices);
+        mNativeIndexBuffer.put(mIndices);
+
+        mNativeVertBuffer.position(0);
+        mNativeIndexBuffer.position(0);
+    }
+
+    /**
+     * Generates the vertex buffer objects containing the vertex data and the draw indices
+     */
+    private void genVBOs() {
+        int[] VBOs = new int[2];
+        GLES30.glGenBuffers(2, VBOs, 0);
+
+        mVertVBO = VBOs[0];
+        mIndexVBO = VBOs[1];
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mVertVBO);
+        GLES30.glBufferData(
+                GLES30.GL_ARRAY_BUFFER,
+                mNativeVertBuffer.capacity() * BYTES_PER_FLOAT,
+                mNativeVertBuffer,
+                GLES30.GL_STATIC_DRAW);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mIndexVBO);
+        GLES30.glBufferData(
+                GLES30.GL_ARRAY_BUFFER,
+                mNativeIndexBuffer.capacity() * BYTES_PER_INT,
+                mNativeIndexBuffer,
+                GLES30.GL_STATIC_DRAW);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+    }
+
+    private void genVAO() {
+        int[] VAOArray = new int[1];
+        GLES30.glGenVertexArrays(1, VAOArray, 0);
+        VAO = VAOArray[0];
+    }
+
+    /**
+     * Initializes the vertex array object that will be used to draw the hypercube
+     */
+    private void initVAO() {
+        GLES30.glBindVertexArray(VAO);
+
+        GLES30.glEnableVertexAttribArray(mVertexHandle);
+        GLES30.glEnableVertexAttribArray(mPrevVertexHandle);
+        GLES30.glEnableVertexAttribArray(mNextVertexHandle);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mVertVBO);
+
+        GLES30.glVertexAttribPointer(
+                mVertexHandle,
+                BYTES_PER_FLOAT,
+                GLES30.GL_FLOAT, false,
+                0,
+                0);
+        GLES30.glVertexAttribPointer(
+                mPrevVertexHandle,
+                BYTES_PER_FLOAT,
+                GLES30.GL_FLOAT, false,
+                0,
+                mVertices.length * BYTES_PER_FLOAT);
+        GLES30.glVertexAttribPointer(
+                mNextVertexHandle,
+                BYTES_PER_FLOAT,
+                GLES30.GL_FLOAT, false,
+                0,
+                (mVertices.length + mPrevVertices.length) * BYTES_PER_FLOAT);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+
+        GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, mIndexVBO);
+
+        GLES30.glBindVertexArray(0);
+    }
+
+    /**
+     * Draws the hypercube to the screen
+     */
+    public void draw() {
+        GLES30.glBindVertexArray(VAO);
+        GLES30.glDrawElements(GLES30.GL_TRIANGLES, mIndices.length, GLES30.GL_UNSIGNED_INT, 0);
+        GLES30.glBindVertexArray(0);
     }
 
     /**
@@ -94,14 +230,23 @@ public class Hypercube {
         return unlockedAxes;
     }
 
+    /**
+     * Generates the vertex data for the hypercube (arrays of vertices, indices and normals)
+     *
+     * @param projectionConstant The camera's distance to the hypervolume of projection (MUST BE GREATER THAN GREATEST EXTENT OF SHAPE)
+     */
     private void genVertexData(float projectionConstant) {
         //4 * number of faces vertices, each with mDimensions components
         mVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
                                      Utils.powI(2, mDimensions - 2) * 4) * mDimensions];
 
-        //4 * number of faces vertices, each with mDimensions components each with 2 adjacent vertices
-        mAdjVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
-                                    Utils.powI(2, mDimensions - 2) * 4) * mDimensions * 2];
+        //4 * number of faces vertices, each with mDimensions components
+        mPrevVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
+                                         Utils.powI(2, mDimensions - 2) * 4) * mDimensions];
+
+        //4 * number of faces vertices, each with mDimensions components
+        mNextVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
+                                         Utils.powI(2, mDimensions - 2) * 4) * mDimensions];
 
         //6 * number of faces vertices (2 triangles per face * 3 points per triangle)
         mIndices = new int[(int) CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
@@ -156,16 +301,16 @@ public class Hypercube {
                 for (int i = 0; i < 4; i++) {
                     System.arraycopy(   //Previous vertex
                             mVertices,
-                            (vertFaceStartI + ((i - 1) % 4)) * mDimensions,
-                            mAdjVertices,
-                            (vertFaceStartI + i) * 2 * mDimensions,
+                            (vertFaceStartI + ((i + 3) % 4)) * mDimensions, //It's really (i - 1)
+                            mPrevVertices,                                    //but Java's mod is a remainder
+                            (vertFaceStartI + i) * mDimensions,
                             mDimensions);
 
                     System.arraycopy(   //Next vertex
                             mVertices,
                             (vertFaceStartI + ((i + 1) % 4)) * mDimensions,
-                            mAdjVertices,
-                            (vertFaceStartI + i) * 2 * mDimensions + mDimensions,
+                            mNextVertices,
+                            (vertFaceStartI + i) * mDimensions,
                             mDimensions);
                 }
 

@@ -8,14 +8,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 
 class Utils {
 
     private static final String TAG = "Utils";
-    private static final int BYTES_PER_FLOAT = 4;
 
     /**
      * Projects a vertex down a dimension
@@ -153,27 +149,5 @@ class Utils {
         Utils.checkGLError("Program");
 
         return program;
-    }
-
-    public static int[] genVBO(float[] data) {
-        final int[] VBO = new int[1];
-
-        GLES30.glGenBuffers(1, VBO, 0);
-
-        FloatBuffer nativeBuffer = ByteBuffer.allocateDirect(data.length * BYTES_PER_FLOAT)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-
-        nativeBuffer.put(data);
-        nativeBuffer.position(0);
-
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, VBO[0]);
-        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, nativeBuffer.capacity() * BYTES_PER_FLOAT, nativeBuffer, GLES30.GL_STATIC_DRAW);
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
-
-        nativeBuffer.limit(0);  //These two lines I think will make it...more likely that
-        nativeBuffer = null;        //it'll be garbage collected
-
-        return VBO;
     }
 }
