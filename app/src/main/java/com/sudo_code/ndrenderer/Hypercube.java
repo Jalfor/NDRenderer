@@ -11,16 +11,16 @@ import java.nio.IntBuffer;
 
 public class Hypercube {
 
-    private final int BYTES_PER_INT = 4;
-    private final int BYTES_PER_FLOAT = 4;
+    private static final int BYTES_PER_INT = 4;
+    private static final int BYTES_PER_FLOAT = 4;
 
     private float[] mVertices;  //In the form x,y,z,w...x,y etc.
     private float[] mPrevVertices;
     private float[] mNextVertices;
     private int[]   mIndices;
 
-    FloatBuffer mNativeVertBuffer;
-    IntBuffer mNativeIndexBuffer;
+    private FloatBuffer mNativeVertBuffer;
+    private IntBuffer   mNativeIndexBuffer;
 
     private int VAO;
     private int mVertVBO;
@@ -50,7 +50,6 @@ public class Hypercube {
         genNativeBuffers();
         genVBOs();
         genVAO();
-        initVAO();
     }
 
     /**
@@ -104,16 +103,14 @@ public class Hypercube {
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
     }
 
+    /**
+     * Generates and initializes the vertex array object that will be used to draw the hypercube
+     */
     private void genVAO() {
         int[] VAOArray = new int[1];
         GLES30.glGenVertexArrays(1, VAOArray, 0);
         VAO = VAOArray[0];
-    }
 
-    /**
-     * Initializes the vertex array object that will be used to draw the hypercube
-     */
-    private void initVAO() {
         GLES30.glBindVertexArray(VAO);
 
         GLES30.glEnableVertexAttribArray(mVertexHandle);
@@ -125,19 +122,22 @@ public class Hypercube {
         GLES30.glVertexAttribPointer(
                 mVertexHandle,
                 BYTES_PER_FLOAT,
-                GLES30.GL_FLOAT, false,
+                GLES30.GL_FLOAT,
+                false,
                 0,
                 0);
         GLES30.glVertexAttribPointer(
                 mPrevVertexHandle,
                 BYTES_PER_FLOAT,
-                GLES30.GL_FLOAT, false,
+                GLES30.GL_FLOAT,
+                false,
                 0,
                 mVertices.length * BYTES_PER_FLOAT);
         GLES30.glVertexAttribPointer(
                 mNextVertexHandle,
                 BYTES_PER_FLOAT,
-                GLES30.GL_FLOAT, false,
+                GLES30.GL_FLOAT,
+                false,
                 0,
                 (mVertices.length + mPrevVertices.length) * BYTES_PER_FLOAT);
 

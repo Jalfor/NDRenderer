@@ -2,6 +2,7 @@ package com.sudo_code.ndrenderer;
 
 import android.content.Context;
 import android.opengl.GLES30;
+import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
@@ -12,20 +13,66 @@ import com.google.vrtoolkit.cardboard.Eye;
 import com.google.vrtoolkit.cardboard.HeadTransform;
 import com.google.vrtoolkit.cardboard.Viewport;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
 import javax.microedition.khronos.egl.EGLConfig;
 
 
 public class MainActivity extends CardboardActivity implements CardboardView.StereoRenderer {
 
     private static final String TAG = "MainActivity";
+    private static final int BYTES_PER_FLOAT = 4;
 
     private Vibrator mVibrator;
     private CardboardOverlayView mOverlayView;
 
-    private int program;
-    private int uniformBuffer;
+    private int mProgram;
+    private int mProgramUniformBlockIndex;
+    private int mUniformBuffer;
+    private final int mUniformBufferkBindingIndex = 0;
 
-    private Hypercube hypercube;
+    private final float mProjectionConstant = 2.f;
+    private float[]     mProjectionMatrix = new float[16];
+
+    private Hypercube mHypercube;
+
+    private void genUniformBuffer() {
+        int[] uniformBufferArray = new int[1];
+        GLES30.glGenBuffers(1, uniformBufferArray, 0);
+        mUniformBuffer = uniformBufferArray[0];
+
+        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 1000.f);
+        float[] padding = new float[3];
+
+        FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
+                mProjectionMatrix.length * BYTES_PER_FLOAT + 4 * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+
+        uniformBufferData.put(mProjectionMatrix);
+        uniformBufferData.put(mProjectionConstant);
+        uniformBufferData.put(padding);
+        uniformBufferData.position(0);
+
+        GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, mUniformBuffer);
+
+        GLES30.glBufferData(
+                GLES30.GL_UNIFORM_BUFFER,
+                uniformBufferData.capacity() * BYTES_PER_FLOAT,
+                uniformBufferData,
+                GLES30.GL_STATIC_DRAW);
+
+        GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, 0);
+
+        GLES30.glBindBufferRange(
+                GLES30.GL_UNIFORM_BUFFER,
+                mUniformBufferkBindingIndex,
+                mUniformBuffer,
+                0,
+                uniformBufferData.capacity());
+    }
 
     /**
      * Sets the view to our CardboardView and initializes the transformation matrices we will use
@@ -71,12 +118,15 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.vert, this);
         shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.frag, this);
 
-        program = Utils.genProgram(shaders);
+        mProgram = Utils.genProgram(shaders);
         Utils.delShaders(shaders);
 
+        mProgramUniformBlockIndex = GLES30.glGetUniformBlockIndex(mProgram, "Globals");
+        GLES30.glUniformBlockBinding(mProgram, mProgramUniformBlockIndex, mUniformBufferkBindingIndex);
 
+        genUniformBuffer();
 
-        hypercube = new Hypercube(4, 3, 0, 1, 2);
+        mHypercube = new Hypercube(4, 3, 0, 1, 2);
 
         Utils.checkGLError("onSurfaceCreated");
     }
@@ -100,8 +150,8 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     public void onDrawEye(Eye eye) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
-        GLES30.glUseProgram(program);
-        hypercube.draw();
+        GLES30.glUseProgram(mProgram);
+        mHypercube.draw();
         GLES30.glUseProgram(0);
     }
 
