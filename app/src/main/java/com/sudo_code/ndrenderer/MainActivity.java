@@ -43,7 +43,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glGenBuffers(1, uniformBufferArray, 0);
         mUniformBuffer = uniformBufferArray[0];
 
-        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 1000.f);
+        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);
         float[] padding = new float[3];
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
@@ -107,7 +107,6 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
      *
      * @param config The EGL configuration used when creating the surface.
      */
-
     @Override
     public void onSurfaceCreated(EGLConfig config) {
         Log.i(TAG, "onSurfaceCreated");
