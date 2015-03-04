@@ -6,6 +6,8 @@ layout (location = 2) in vec4 nextVertex;
 
 smooth out vec3 normal;
 
+uniform float frameTime;
+
 layout(std140) uniform Globals
 {
     mat4 projectionMatrix;
@@ -13,18 +15,25 @@ layout(std140) uniform Globals
     float[3] padding;
 };
 
-mat4 rotMatZ = mat4(
-     cos(1.0), sin(1.0)    , 0, 0,
-    -sin(1.0), cos(1.0)    , 0, 0,
-    0        , 0           , 1, 0,
-    0        , 0           , 0, 1
+mat4 rotMatXY = mat4(
+     cos(frameTime), sin(frameTime), 0, 0,
+    -sin(frameTime), cos(frameTime), 0, 0,
+    0              , 0             , 1, 0,
+    0              , 0             , 0, 1
 );
 
-mat4 rotMatX = mat4(
-    1        , 0         , 0       , 0,
-    0        , cos(1.0)  , sin(1.0), 0,
-    0        , sin(1.0)  , cos(1.0), 0,
-    0        , 0         , 0       , 1
+mat4 rotMatYZ = mat4(
+    1        , 0                , 0       , 0,
+    0        ,  cos(frameTime)  , sin(frameTime), 0,
+    0        , -sin(frameTime)  , cos(frameTime), 0,
+    0        , 0                , 0             , 1
+);
+
+mat4 rotMatXW = mat4(
+     cos(frameTime), 0, 0, sin(frameTime),
+    0              , 1, 0, 0,
+    0              , 0, 1, 0,
+    -sin(frameTime), 0, 0, cos(frameTime)
 );
 
 vec3 projectDown(vec4 vertex4d)
@@ -34,18 +43,18 @@ vec3 projectDown(vec4 vertex4d)
 
 void main()
 {
-    vec3 vertex3d = projectDown(vertex);
-    vec3 prevVertex3d = projectDown(prevVertex);
-    vec3 nextVertex3d = projectDown(nextVertex);
+    vec4 rotVertex = rotMatXW * rotMatYZ * vertex;
+    vec4 rotPrevVertex = rotMatXW * rotMatYZ * prevVertex;
+    vec4 rotNextVertex = rotMatXW * rotMatYZ * nextVertex;
 
-    //Correct version
-    //normal = normalize(cross(prevVertex3d - vertex3d, nextVertex3d - vertex3d));
+    vec3 vertex3d = projectDown(rotVertex);
+    vec3 prevVertex3d = projectDown(rotPrevVertex);
+    vec3 nextVertex3d = projectDown(rotNextVertex);
 
-    vertex3d = mat3(rotMatX) * mat3(rotMatZ) * vertex3d;
-    vertex3d += vec3(0f, 0f, -20.0f);
+    //Correct version (Broken, but looks awesome)
+    normal = normalize(cross(prevVertex3d - vertex3d, nextVertex3d - vertex3d));
 
-    //Temporary while transparancy isn't implemented (it looks cooler)
-    normal = normal = normalize(cross(prevVertex3d, nextVertex3d));
+    vertex3d += vec3(0f, 0f, -15.0f);
 
     gl_Position = projectionMatrix * vec4(vertex3d, 1.f);
 }

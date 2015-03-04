@@ -46,7 +46,7 @@ public class Hypercube {
         mPrevVertexHandle = prevVertexHandle;
         mNextVertexHandle = nextVertexHandle;
 
-        genVertexData(projectionConstant);
+        genVertexData();
         genNativeBuffers();
         genVBOs();
         genVAO();
@@ -232,10 +232,8 @@ public class Hypercube {
 
     /**
      * Generates the vertex data for the hypercube (arrays of vertices, indices and normals)
-     *
-     * @param projectionConstant The camera's distance to the hypervolume of projection (MUST BE GREATER THAN GREATEST EXTENT OF SHAPE)
      */
-    private void genVertexData(float projectionConstant) {
+    private void genVertexData() {
         //4 * number of faces vertices, each with mDimensions components
         mVertices = new float[(int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
                                      Utils.powI(2, mDimensions - 2) * 4) * mDimensions];

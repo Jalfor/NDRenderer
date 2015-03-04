@@ -29,12 +29,18 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private CardboardOverlayView mOverlayView;
 
     private int mProgram;
+
+    private int mFrameTimeHandle;
+
     private int mProgramUniformBlockIndex;
     private int mUniformBuffer;
     private final int mUniformBufferkBindingIndex = 0;
 
-    private final float mProjectionConstant = 2.f;
+    private final float mProjectionConstant = 3.f;
     private float[]     mProjectionMatrix = new float[16];
+
+    private long mStartTime = System.nanoTime();
+    private long mCurrentTime;
 
     private Hypercube mHypercube;
 
@@ -44,7 +50,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mUniformBuffer = uniformBufferArray[0];
 
         Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);
-        float[] padding = new float[3];
+        float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
                 mProjectionMatrix.length * BYTES_PER_FLOAT + 4 * BYTES_PER_FLOAT)
@@ -125,7 +131,13 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         genUniformBuffer();
 
+        mFrameTimeHandle = GLES30.glGetUniformLocation(mProgram, "frameTime");
+        //GLES30.glUniform1f(mFrameTimeHandle, 0.f);
+
         mHypercube = new Hypercube(4, 3, 0, 1, 2);
+
+        GLES30.glEnable(GLES30.GL_BLEND);
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
 
         Utils.checkGLError("onSurfaceCreated");
     }
@@ -137,7 +149,10 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-
+        GLES30.glUseProgram(mProgram);
+        mCurrentTime = System.nanoTime() - mStartTime;
+        GLES30.glUniform1f(mFrameTimeHandle, (float) (((double) mCurrentTime) / 1000000000.d));
+        GLES30.glUseProgram(0);
     }
 
     /**
