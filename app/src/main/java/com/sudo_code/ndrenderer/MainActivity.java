@@ -37,7 +37,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private final int mUniformBufferkBindingIndex = 0;
 
     private final float mProjectionConstant = 3.f;
-    private float[]     mProjectionMatrix = new float[16];
+    private float[]     mProjectionMatrix = new float[16];  //TODO: See if thiscan be moved to genUniformBuffer without breaking anything
 
     private long mStartTime = System.nanoTime();
     private long mCurrentTime;
@@ -49,7 +49,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glGenBuffers(1, uniformBufferArray, 0);
         mUniformBuffer = uniformBufferArray[0];
 
-        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);
+        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(

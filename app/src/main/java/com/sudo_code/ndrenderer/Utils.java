@@ -142,6 +142,18 @@ class Utils {
 
         GLES30.glLinkProgram(program);
 
+        int[] isLinked = new int[1];
+        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, isLinked, 0);
+        if(isLinked[0] == 0)
+        {
+            Log.i(TAG, "Error linking program: " + GLES30.glGetProgramInfoLog(program));
+
+            //The program is useless now. So delete it.
+            GLES30.glDeleteProgram(program);
+
+            throw new RuntimeException("Error linking shader.");
+        }
+
         for (int i = 0; i < shaders.length; i++) {
             GLES30.glDetachShader(program, shaders[i]);
         }
