@@ -37,7 +37,6 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private final int mUniformBufferkBindingIndex = 0;
 
     private final float mProjectionConstant = 3.f;
-    private float[]     mProjectionMatrix = new float[16];  //TODO: See if thiscan be moved to genUniformBuffer without breaking anything
 
     private long mStartTime = System.nanoTime();
     private long mCurrentTime;
@@ -49,15 +48,16 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glGenBuffers(1, uniformBufferArray, 0);
         mUniformBuffer = uniformBufferArray[0];
 
-        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
+        float[] projectionMatrix = new float[16];
+        Matrix.perspectiveM(projectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
-                mProjectionMatrix.length * BYTES_PER_FLOAT + 4 * BYTES_PER_FLOAT)
+                projectionMatrix.length * BYTES_PER_FLOAT + 4 * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
 
-        uniformBufferData.put(mProjectionMatrix);
+        uniformBufferData.put(projectionMatrix);
         uniformBufferData.put(mProjectionConstant);
         uniformBufferData.put(padding);
         uniformBufferData.position(0);
@@ -68,7 +68,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
                 GLES30.GL_UNIFORM_BUFFER,
                 uniformBufferData.capacity() * BYTES_PER_FLOAT,
                 uniformBufferData,
-                GLES30.GL_STATIC_DRAW);
+                GLES30.GL_STREAM_DRAW);
 
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, 0);
 
@@ -163,6 +163,21 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     @Override
     public void onDrawEye(Eye eye) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
+
+        float[] projectionMatrix = new float[16];
+        Matrix.perspectiveM(projectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);
+
+        if (eye.getType() == Eye.Type.LEFT) {
+            projectionMatrix[12] = 2.5f;
+        }
+
+        else {
+            projectionMatrix[12] = -2.5f;
+        }
+
+        GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, mUniformBuffer);
+        GLES30.glBufferSubData(GLES30.GL_UNIFORM_BUFFER, 0, projectionMatrix.length * BYTES_PER_FLOAT, FloatBuffer.wrap(projectionMatrix));
+        GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, 0);
 
         GLES30.glUseProgram(mProgram);
         mHypercube.draw();

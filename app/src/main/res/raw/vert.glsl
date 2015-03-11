@@ -54,7 +54,7 @@ void main()
     //Correct version (Broken, but looks awesome)
     normal = normalize(cross(prevVertex3d - vertex3d, nextVertex3d - vertex3d));
 
-    vertex3d += vec3(0f, 0f, -15.0f);
+    vertex3d += vec3(0f, 0f, -10.0f);
 
-    gl_Position = projectionMatrix * vec4(vertex3d, 1.f);
+    gl_Position = projectionMatrix* vec4(vertex3d, 1.f);
 }
