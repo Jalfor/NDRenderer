@@ -75,4 +75,33 @@ public class NDVector {
 
         return result;
     }
+
+    /**
+     * Rotates a vector along a plane
+     *
+     * @param vector The vector
+     * @param angle The angle the vector is rotated by (in radians)
+     * @param rotationPlane The plane of rotation (a length two vector containing the dimensions
+     *                      of the rotation plane, e.g. XZ would be {0, 2})
+     * @return The rotated vector
+     */
+    public static float[] rotate(float[] vector, float angle, int[] rotationPlane) {
+        float[] result = vector.clone();
+
+        //Pretty much just going down the rows of a rotation matrix. Right now, I just don't think
+        //it's worth all the trouble and overhead of writing a proper matrix thingo
+        for (int comp = 0; comp < vector.length; comp++) {
+            if (comp == rotationPlane[0]) {
+                result[comp] = vector[comp] * (float) Math.cos(angle) -
+                        vector[rotationPlane[1]] * (float) Math.sin(angle);
+            }
+
+            else if (comp == rotationPlane[1]) {
+                result[comp] = vector[comp] * (float) Math.cos(angle) +
+                        vector[rotationPlane[0]] * (float) Math.sin(angle);
+            }
+        }
+
+        return result;
+    }
 }

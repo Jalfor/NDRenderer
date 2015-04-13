@@ -1,10 +1,12 @@
 #version 300 es
 
-smooth in vec3 normal;
+flat in vec3 fNormal;
 
 out vec4 outputColor;
 
 void main()
 {
-    outputColor = vec4(0.5 * (normal + 1.0), 0.4);
+    outputColor = vec4(1.f, 1.f, 1.f, 0.4f);
+    vec3 normal = fNormal;
+    //outputColor = vec4(0.25f * (normal + 3), 0.4);
 }

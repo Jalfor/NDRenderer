@@ -147,11 +147,9 @@ class Utils {
         if(isLinked[0] == 0)
         {
             Log.i(TAG, "Error linking program: " + GLES30.glGetProgramInfoLog(program));
-
-            //The program is useless now. So delete it.
             GLES30.glDeleteProgram(program);
 
-            throw new RuntimeException("Error linking shader.");
+            throw new RuntimeException("Error linking program.");
         }
 
         for (int i = 0; i < shaders.length; i++) {

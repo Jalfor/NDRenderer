@@ -30,16 +30,14 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
     private int mProgram;
 
-    private int mFrameTimeHandle;
-
     private int mProgramUniformBlockIndex;
     private int mUniformBuffer;
     private final int mUniformBufferkBindingIndex = 0;
 
     private final float mProjectionConstant = 3.f;
 
-    private long mStartTime = System.nanoTime();
-    private long mCurrentTime;
+    private long mPrevTime    = System.nanoTime();
+    private long mFrameTime   = 0;
 
     private Hypercube mHypercube;
 
@@ -49,7 +47,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mUniformBuffer = uniformBufferArray[0];
 
         float[] projectionMatrix = new float[16];
-        Matrix.perspectiveM(projectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
+        Matrix.perspectiveM(projectionMatrix, 0, 45.f, 1.f, 0.1f, 500.f);  //TODO: change this in onSurfaceChanged
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
@@ -116,7 +114,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     @Override
     public void onSurfaceCreated(EGLConfig config) {
         Log.i(TAG, "onSurfaceCreated");
-        GLES30.glClearColor(0.1f, 0.1f, 0.1f, 0.5f); // Dark background so text shows up well.
+        GLES30.glClearColor(0.1f, 0.1f, 0.1f, 0.5f);
 
         int[] shaders = new int[2];
 
@@ -131,10 +129,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         genUniformBuffer();
 
-        mFrameTimeHandle = GLES30.glGetUniformLocation(mProgram, "frameTime");
-        //GLES30.glUniform1f(mFrameTimeHandle, 0.f);
-
-        mHypercube = new Hypercube(4, 3, 0, 1, 2);
+        mHypercube = new Hypercube(4, mProjectionConstant, 12.f, 0, 1);
 
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
@@ -149,10 +144,11 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
      */
     @Override
     public void onNewFrame(HeadTransform headTransform) {
-        GLES30.glUseProgram(mProgram);
-        mCurrentTime = System.nanoTime() - mStartTime;
-        GLES30.glUniform1f(mFrameTimeHandle, (float) (((double) mCurrentTime) / 1000000000.d));
-        GLES30.glUseProgram(0);
+        mFrameTime = System.nanoTime() - mPrevTime;
+        mPrevTime  = System.nanoTime();
+
+        mHypercube.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {0, 2});
+        mHypercube.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {2, 3});
     }
 
     /**
@@ -165,14 +161,14 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
         float[] projectionMatrix = new float[16];
-        Matrix.perspectiveM(projectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);
+        Matrix.perspectiveM(projectionMatrix, 0, 45.f, 1.f, 0.1f, 500.f);
 
         if (eye.getType() == Eye.Type.LEFT) {
-            projectionMatrix[12] = 2.5f;
+            //projectionMatrix[12] = 2.5f;
         }
 
         else {
-            projectionMatrix[12] = -2.5f;
+            //projectionMatrix[12] = -2.5f;
         }
 
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, mUniformBuffer);
