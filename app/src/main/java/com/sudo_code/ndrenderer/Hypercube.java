@@ -128,17 +128,19 @@ public class Hypercube {
     /**
      * Update vertex native buffer
      */
-    private void updateVertNativeBuffers() {
+    private void updateNativeBuffers() {
         mNativeVertBuffer.put(mVertices3d);
         mNativeVertBuffer.put(mNormals);
+        mNativeIndexBuffer.put(mIndices);
 
         mNativeVertBuffer.position(0);
+        mNativeIndexBuffer.position(0);
     }
 
     /**
      * Updates the vertex buffer object containing the a vertex positions and normals
      */
-    private void updateVertVBO() {
+    private void updateVBOs() {
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mVertVBO);
 
         GLES30.glBufferSubData(
@@ -146,6 +148,14 @@ public class Hypercube {
                 0,
                 mNativeVertBuffer.capacity() * BYTES_PER_FLOAT,
                 mNativeVertBuffer);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mIndexVBO);
+
+        GLES30.glBufferSubData(
+                GLES30.GL_ARRAY_BUFFER,
+                0,
+                mNativeIndexBuffer.capacity() * BYTES_PER_INT,
+                mNativeIndexBuffer);
 
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
     }
@@ -370,6 +380,48 @@ public class Hypercube {
         }
 
         updateNormals();
+        sortFaces();
+    }
+
+    /**
+     * Rearranges mIncices so that it's in order by z coordinates of the center of the faces
+     */
+    private void sortFaces() {
+        float[] faceDists = new float[mFaceCount];  //So we don't recalculate these multiple times
+
+        for (int faceI = 0; faceI < faceDists.length; faceI++) {
+            faceDists[faceI] += (float) Math.pow((mVertices3d[mIndices[faceI * 6 + 1] * 3 + 0] +
+                                                  mVertices3d[mIndices[faceI * 6 + 3] * 3 + 0]) / 2.f, 2.f);
+            faceDists[faceI] += (float) Math.pow((mVertices3d[mIndices[faceI * 6 + 1] * 3 + 1] +
+                                                  mVertices3d[mIndices[faceI * 6 + 3] * 3 + 1]) / 2.f, 2.f);
+            faceDists[faceI] += (float) Math.pow((mVertices3d[mIndices[faceI * 6 + 1] * 3 + 2] +
+                                                  mVertices3d[mIndices[faceI * 6 + 3] * 3 + 2]) / 2.f, 2.f);
+
+            faceDists[faceI] = (float) Math.sqrt(faceDists[faceI]);
+        }
+
+        for (int faceI = 0; faceI < mFaceCount - 1; faceI++) {
+            int farthestFaceI = faceI;
+            float farthestFaceDist = faceDists[faceI];
+
+            for (int faceI2 = faceI + 1; faceI2 < mFaceCount; faceI2++) {   //Find the minimum
+                float faceI2Dist = faceDists[faceI2];
+
+                if (faceI2Dist > farthestFaceDist) {
+                    farthestFaceI = faceI2;
+                    farthestFaceDist = faceI2Dist;
+                }
+            }
+
+            int[] temp = new int[6];    //Swap the faces
+            System.arraycopy(mIndices, faceI * 6, temp, 0, 6);
+            System.arraycopy(mIndices, farthestFaceI * 6, mIndices, faceI * 6, 6);
+            System.arraycopy(temp, 0, mIndices, farthestFaceI * 6, 6);
+
+            float temp2 = faceDists[faceI];
+            faceDists[faceI] = faceDists[farthestFaceI];
+            faceDists[farthestFaceI] = temp2;
+        }
     }
 
     /**
@@ -392,8 +444,8 @@ public class Hypercube {
      */
     public void draw() {
         updateProjection();
-        updateVertNativeBuffers();
-        updateVertVBO();
+        updateNativeBuffers();
+        updateVBOs();
 
         GLES30.glBindVertexArray(mVAO);
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, mIndices.length, GLES30.GL_UNSIGNED_INT, 0);

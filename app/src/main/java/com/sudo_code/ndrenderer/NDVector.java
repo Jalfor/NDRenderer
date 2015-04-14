@@ -36,7 +36,7 @@ public class NDVector {
         float length = 0;
 
         for (int i = 0; i < vector.length; i++) {
-            length += vector[i];
+            length += Math.pow(vector[i], 2.f);
         }
 
         return (float) Math.sqrt(length);
@@ -88,20 +88,30 @@ public class NDVector {
     public static float[] rotate(float[] vector, float angle, int[] rotationPlane) {
         float[] result = vector.clone();
 
-        //Pretty much just going down the rows of a rotation matrix. Right now, I just don't think
-        //it's worth all the trouble and overhead of writing a proper matrix thingo
-        for (int comp = 0; comp < vector.length; comp++) {
-            if (comp == rotationPlane[0]) {
-                result[comp] = vector[comp] * (float) Math.cos(angle) -
-                        vector[rotationPlane[1]] * (float) Math.sin(angle);
-            }
+        result[rotationPlane[0]] = vector[rotationPlane[0]] * (float) Math.cos(angle) -
+                    vector[rotationPlane[1]] * (float) Math.sin(angle);
 
-            else if (comp == rotationPlane[1]) {
-                result[comp] = vector[comp] * (float) Math.cos(angle) +
-                        vector[rotationPlane[0]] * (float) Math.sin(angle);
-            }
-        }
+        result[rotationPlane[1]] = vector[rotationPlane[1]] * (float) Math.cos(angle) +
+                    vector[rotationPlane[0]] * (float) Math.sin(angle);
 
         return result;
+    }
+
+    /**
+     * Finds the triangle center by averaging each of the components
+     *
+     * @param vertex1 The first vertex of the triangle
+     * @param vertex2 The second vertex of the triangle
+     * @param vertex3 The third vertex of the triangle
+     * @return The center of the triangle
+     */
+    public static float[] getTriangleCenter(float[] vertex1, float[] vertex2, float[] vertex3) {
+        float[] center = new float[vertex1.length];
+
+        for (int i = 0; i < vertex1.length; i++) {
+            center[i] = (vertex1[i] + vertex2[i] + vertex3[i]) / 3;
+        }
+
+        return center;
     }
 }

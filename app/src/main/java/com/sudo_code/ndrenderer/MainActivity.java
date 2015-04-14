@@ -129,7 +129,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         genUniformBuffer();
 
-        mHypercube = new Hypercube(4, mProjectionConstant, 12.f, 0, 1);
+        mHypercube = new Hypercube(5, mProjectionConstant, 12.f, 0, 1);
 
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
