@@ -35,27 +35,30 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private final int mUniformBufferkBindingIndex = 0;
 
     private final float mProjectionConstant = 3.f;
+    private float[] mProjectionMatrix;
 
     private long mPrevTime    = System.nanoTime();
     private long mFrameTime   = 0;
 
     private Hypercube mHypercube;
+    private float[]   mHypercubeMatrix; //Stick this into the class probably eventually
 
     private void genUniformBuffer() {
         int[] uniformBufferArray = new int[1];
         GLES30.glGenBuffers(1, uniformBufferArray, 0);
         mUniformBuffer = uniformBufferArray[0];
 
-        float[] projectionMatrix = new float[16];
-        Matrix.perspectiveM(projectionMatrix, 0, 45.f, 1.f, 0.1f, 500.f);  //TODO: change this in onSurfaceChanged
+        mProjectionMatrix = new float[16];
+        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.01f, 100.f);  //TODO: change this in onSurfaceChanged
+        //Matrix.setLookAtM(mProjectionMatrix, 0, 0.0f, 0.0f, 10.f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
-                projectionMatrix.length * BYTES_PER_FLOAT + 4 * BYTES_PER_FLOAT)
+                mProjectionMatrix.length * BYTES_PER_FLOAT + 4 * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
 
-        uniformBufferData.put(projectionMatrix);
+        uniformBufferData.put(mProjectionMatrix);
         uniformBufferData.put(mProjectionConstant);
         uniformBufferData.put(padding);
         uniformBufferData.position(0);
@@ -129,7 +132,11 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         genUniformBuffer();
 
-        mHypercube = new Hypercube(5, mProjectionConstant, 12.f, 0, 1);
+        mHypercubeMatrix = new float[16];
+        Matrix.setIdentityM(mHypercubeMatrix, 0);
+        Matrix.translateM(mHypercubeMatrix, 0, 0, 0, 10.f);
+
+        mHypercube = new Hypercube(4, mProjectionConstant, 10.f, 0, 1);
 
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
@@ -160,19 +167,13 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     public void onDrawEye(Eye eye) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
 
-        float[] projectionMatrix = new float[16];
-        Matrix.perspectiveM(projectionMatrix, 0, 45.f, 1.f, 0.1f, 500.f);
-
-        if (eye.getType() == Eye.Type.LEFT) {
-            //projectionMatrix[12] = 2.5f;
-        }
-
-        else {
-            //projectionMatrix[12] = -2.5f;
-        }
+        float[] eyeProjectionMatrix = new float[16];
+        Matrix.multiplyMM(eyeProjectionMatrix, 0, eye.getEyeView(), 0, mHypercubeMatrix, 0);
+        Matrix.multiplyMM(eyeProjectionMatrix, 0, mProjectionMatrix, 0, eyeProjectionMatrix, 0);
 
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, mUniformBuffer);
-        GLES30.glBufferSubData(GLES30.GL_UNIFORM_BUFFER, 0, projectionMatrix.length * BYTES_PER_FLOAT, FloatBuffer.wrap(projectionMatrix));
+        GLES30.glBufferSubData(GLES30.GL_UNIFORM_BUFFER, 0, eyeProjectionMatrix.length * BYTES_PER_FLOAT,
+                FloatBuffer.wrap(eyeProjectionMatrix));
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, 0);
 
         GLES30.glUseProgram(mProgram);

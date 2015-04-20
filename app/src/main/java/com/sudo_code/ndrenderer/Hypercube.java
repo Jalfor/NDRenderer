@@ -372,7 +372,7 @@ public class Hypercube {
 
             mVertices3d[vertI * 3 + 0] = vertex[0];
             mVertices3d[vertI * 3 + 1] = vertex[1];
-            mVertices3d[vertI * 3 + 2] = vertex[2] - mViewDist;
+            mVertices3d[vertI * 3 + 2] = vertex[2];// - mViewDist;
 
             mNormals[vertI * 3 + 0] = 0;
             mNormals[vertI * 3 + 1] = 0;
@@ -394,8 +394,8 @@ public class Hypercube {
                                                   mVertices3d[mIndices[faceI * 6 + 3] * 3 + 0]) / 2.f, 2.f);
             faceDists[faceI] += (float) Math.pow((mVertices3d[mIndices[faceI * 6 + 1] * 3 + 1] +
                                                   mVertices3d[mIndices[faceI * 6 + 3] * 3 + 1]) / 2.f, 2.f);
-            faceDists[faceI] += (float) Math.pow((mVertices3d[mIndices[faceI * 6 + 1] * 3 + 2] +
-                                                  mVertices3d[mIndices[faceI * 6 + 3] * 3 + 2]) / 2.f, 2.f);
+            faceDists[faceI] += (float) Math.pow((mVertices3d[mIndices[faceI * 6 + 1] * 3 + 2] - mViewDist +
+                                                  mVertices3d[mIndices[faceI * 6 + 3] * 3 + 2] - mViewDist) / 2.f, 2.f);
 
             faceDists[faceI] = (float) Math.sqrt(faceDists[faceI]);
         }
