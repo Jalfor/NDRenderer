@@ -50,7 +50,6 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         mProjectionMatrix = new float[16];
         Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.01f, 100.f);  //TODO: change this in onSurfaceChanged
-        //Matrix.setLookAtM(mProjectionMatrix, 0, 0.0f, 0.0f, 10.f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
@@ -117,7 +116,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     @Override
     public void onSurfaceCreated(EGLConfig config) {
         Log.i(TAG, "onSurfaceCreated");
-        GLES30.glClearColor(0.1f, 0.1f, 0.1f, 0.5f);
+        GLES30.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
         int[] shaders = new int[2];
 
@@ -134,7 +133,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         mHypercubeMatrix = new float[16];
         Matrix.setIdentityM(mHypercubeMatrix, 0);
-        Matrix.translateM(mHypercubeMatrix, 0, 0, 0, 10.f);
+        Matrix.translateM(mHypercubeMatrix, 0, 0, 0, -10.f);
 
         mHypercube = new Hypercube(4, mProjectionConstant, 10.f, 0, 1);
 
