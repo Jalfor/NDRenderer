@@ -186,7 +186,7 @@ public abstract class NDShape {
      * Updates the mVertices3d array as a projection of mVertices
      */
     private void updateProjection() {
-        for (int vertI = 0; vertI < mFaceCount * 4; vertI++) {  //Vertices
+        for (int vertI = 0; vertI < mVertices.length / mDimensions; vertI++) {  //Vertices
             float[] vertex = new float[mDimensions];
             System.arraycopy(mVertices, vertI * mDimensions, vertex, 0, mDimensions);
 
@@ -202,7 +202,7 @@ public abstract class NDShape {
         }
 
         updateNormals();
-        sortFaces();
+        //sortFaces();
     }
 
     /**

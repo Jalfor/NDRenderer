@@ -40,7 +40,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private long mPrevTime    = System.nanoTime();
     private long mFrameTime   = 0;
 
-    private Hypercube mHypercube;
+    private Hypertorus mHypertorus;
     private float[]   mHypercubeMatrix; //Stick this into the class probably eventually
 
     private void genUniformBuffer() {
@@ -135,7 +135,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         Matrix.setIdentityM(mHypercubeMatrix, 0);
         Matrix.translateM(mHypercubeMatrix, 0, 0, 0, -10.f);
 
-        mHypercube = new Hypercube(4, mProjectionConstant, 10.f, 0, 1);
+        mHypertorus = new Hypertorus(4, mProjectionConstant, 10.f, 0, 1);
 
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
@@ -153,8 +153,8 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mFrameTime = System.nanoTime() - mPrevTime;
         mPrevTime  = System.nanoTime();
 
-        mHypercube.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {0, 2});
-        mHypercube.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {2, 3});
+        mHypertorus.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {0, 2});
+        mHypertorus.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {2, 3});
     }
 
     /**
@@ -176,7 +176,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, 0);
 
         GLES30.glUseProgram(mProgram);
-        mHypercube.draw();
+        mHypertorus.draw();
         GLES30.glUseProgram(0);
     }
 

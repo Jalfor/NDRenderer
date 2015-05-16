@@ -60,6 +60,23 @@ public class NDVector {
     }
 
     /**
+     * Calculates the vector1 + vector2
+     *
+     * @param vector1 The first vector
+     * @param vector2 The second vector
+     * @return vector1 + vector2
+     */
+    public static float[] add(float[] vector1, float[] vector2) {
+        float[] result = new float[vector1.length];
+
+        for (int i = 0; i < vector1.length; i++) {
+            result[i] = vector1[i] + vector2[i];
+        }
+
+        return result;
+    }
+
+    /**
      * Calculates the vector1 - vector2
      *
      * @param vector1 The first vector
@@ -71,6 +88,28 @@ public class NDVector {
 
         for (int i = 0; i < vector1.length; i++) {
             result[i] = vector1[i] - vector2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculates matrix * vector
+     *
+     * Assumes the matrix is indexed column major ([x][y])
+     *
+     * @param matrix The matrix
+     * @param vector The vector
+     * @return matrix * vector
+     */
+    public static float[] multMatrix(float[][] matrix, float[] vector) {
+        float[] result = new float[vector.length];
+
+        for (int y = 0; y < vector.length; y++) {
+            result[y] = 0;
+            for (int x = 0; x < matrix.length; x++) {
+                result[y] += matrix[x][y] * vector[x];
+            }
         }
 
         return result;

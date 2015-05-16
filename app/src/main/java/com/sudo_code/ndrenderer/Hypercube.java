@@ -93,6 +93,7 @@ public class Hypercube extends NDShape {
     /**
      * Generates the vertex data for the hypercube (arrays of vertices, indices and normals)
      */
+    @Override
     protected void genVertexData() {
         mFaceCount = (int) (CombinatoricsUtils.binomialCoefficient(mDimensions, 2) *
                 Utils.powI(2, mDimensions - 2));
@@ -166,6 +167,7 @@ public class Hypercube extends NDShape {
      * Updates the mNormals array based on mVertices3d (note that inwards and outwards are
      * meaningless concepts when with a projection
      */
+    @Override
     protected void updateNormals() {
         for (int indexFaceStartI = 0; indexFaceStartI < mIndices.length; indexFaceStartI += 6) {   //index triangle start index
             float[] vertex1 = new float[3];
