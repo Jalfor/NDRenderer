@@ -74,7 +74,7 @@ public class CardboardOverlayView extends LinearLayout {
     }
 
     /**
-     * A vert view group containing some horizontally centered text underneath a horizontally
+     * A shape_vert view group containing some horizontally centered text underneath a horizontally
      * centered image.
      *
      * This is a helper class for CardboardOverlayView.

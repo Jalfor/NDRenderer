@@ -250,7 +250,7 @@ public abstract class NDShape {
      * Rotates the NDShape on the rotationPlane plane by an angle of angle radians
      * @param angle The angle the vector is rotated by (in radians)
      * @param rotationPlane The plane of rotation (a length two vector containing the dimensions
-    of the rotation plane, e.g. XZ would be {0, 2})
+     *                      of the rotation plane, e.g. XZ would be {0, 2})
      */
     public void rotate(float angle, int[] rotationPlane) {
         for (int vertI = 0; vertI < mVertices.length; vertI += mDimensions) {
