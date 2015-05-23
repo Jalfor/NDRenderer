@@ -24,6 +24,11 @@ public class ComplexNumber {
         mImag += mImag * complexNumber.getReal();
     }
 
+    public void mult(float scalar) {
+        mReal *= scalar;
+        mImag *= scalar;
+    }
+
     public void add(ComplexNumber complexNumber) {
         mReal += complexNumber.getReal();
         mImag += complexNumber.getImaginary();

@@ -15,7 +15,7 @@ public abstract class NDShape {
     protected int[]   mIndices;   //These are obviously the same in 3D
 
     protected float[] mVertices3d;    //All this is in 3D
-    protected float[] mNormals;
+    protected float[] mSecondaryData;
 
     private FloatBuffer mNativeVertBuffer;
     private IntBuffer   mNativeIndexBuffer;
@@ -25,10 +25,10 @@ public abstract class NDShape {
     private int mIndexVBO;
 
     protected int   mDimensions;
-    private   float mProjectionConstant;
+    protected float mProjectionConstant;
     private   float mViewDist;
-    private   int   mVertexHandle;
-    private   int   mNormalHandle;
+    private   int   mPosHandle;
+    private   int   mSecondaryHandle;
 
     protected int mFaceCount;
 
@@ -38,16 +38,26 @@ public abstract class NDShape {
      * @param dimensions The number of dimensions the NDShape should have
      * @param projectionConstant The camera's distance to the NDShape of projection (MUST BE GREATER THAN 1)
      * @param viewDist The distance from the 2D camera to the center of projection
-     * @param vertexHandle The attribute index of the vertex position
-     * @param normalHandle The attribute index of the vertex normal
+     * @param posHandle The attribute index of the vertex position
+     * @param secondayHandle The attribute index of the vertex normal
      */
-    public NDShape(int dimensions, float projectionConstant, float viewDist, int vertexHandle, int normalHandle) {
+    public NDShape(int dimensions, float projectionConstant, float viewDist, int posHandle, int secondayHandle) {
         mDimensions         = dimensions;
         mProjectionConstant = projectionConstant;
         mViewDist           = viewDist;
-        mVertexHandle       = vertexHandle;
-        mNormalHandle       = normalHandle;
+        mPosHandle          = posHandle;
+        mSecondaryHandle    = secondayHandle;
+    }
 
+    protected abstract void genVertexData();
+    protected abstract void updateSecondaryData();
+
+    /**
+     * MUST be called from subclass constructors. You might ask why this isn't in the constructor,
+     * but Java, in it's infinite wisdom doesn't let you modify variables before calling the
+     * super constructor, making it pretty much impossible to modify superclass behaviour
+     */
+    protected void init() {
         genVertexData();
         updateProjection();
         genNativeBuffers();
@@ -55,16 +65,13 @@ public abstract class NDShape {
         genVAO();
     }
 
-    protected abstract void genVertexData();
-    protected abstract void updateNormals();
-
     /**
      * Generates two native buffers from the Java arrays, one containing the vertex data and the
      * other containing the draw indices
      */
     private void genNativeBuffers() {
         mNativeVertBuffer = ByteBuffer.allocateDirect(
-                (mVertices3d.length + mNormals.length) * BYTES_PER_FLOAT)
+                (mVertices3d.length + mSecondaryData.length) * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
 
@@ -74,7 +81,7 @@ public abstract class NDShape {
                 .asIntBuffer();
 
         mNativeVertBuffer.put(mVertices3d);
-        mNativeVertBuffer.put(mNormals);
+        mNativeVertBuffer.put(mSecondaryData);
         mNativeIndexBuffer.put(mIndices);
 
         mNativeVertBuffer.position(0);
@@ -115,7 +122,7 @@ public abstract class NDShape {
      */
     private void updateNativeBuffers() {
         mNativeVertBuffer.put(mVertices3d);
-        mNativeVertBuffer.put(mNormals);
+        mNativeVertBuffer.put(mSecondaryData);
         mNativeIndexBuffer.put(mIndices);
 
         mNativeVertBuffer.position(0);
@@ -155,20 +162,20 @@ public abstract class NDShape {
 
         GLES30.glBindVertexArray(mVAO);
 
-        GLES30.glEnableVertexAttribArray(mVertexHandle);
-        GLES30.glEnableVertexAttribArray(mNormalHandle);
+        GLES30.glEnableVertexAttribArray(mPosHandle);
+        GLES30.glEnableVertexAttribArray(mSecondaryHandle);
 
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mVertVBO);
 
         GLES30.glVertexAttribPointer(
-                mVertexHandle,
+                mPosHandle,
                 3,
                 GLES30.GL_FLOAT,
                 false,
                 0,
                 0);
         GLES30.glVertexAttribPointer(
-                mNormalHandle,
+                mSecondaryHandle,
                 3,
                 GLES30.GL_FLOAT,
                 false,
@@ -201,7 +208,7 @@ public abstract class NDShape {
             mVertices3d[vertI * 3 + 2] = vertex[2];
         }
 
-        updateNormals();
+        updateSecondaryData();
         //sortFaces();
     }
 

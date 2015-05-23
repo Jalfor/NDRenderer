@@ -1,162 +1,90 @@
 package com.sudo_code.ndrenderer;
 
-import android.opengl.GLES30;
+public class ComplexGraph extends NDShape {
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
+    private int   mDensity;   //The number of points along each axis
+    private float mViewSize;
 
-public class ComplexGraph {
-    private static final int BYTES_PER_FLOAT = 4;
+    public ComplexGraph(int density, float viewSize, float projectionConstant, float viewDist, int posHandle, int colorHandle) {
+        super(4, projectionConstant, viewDist, posHandle, colorHandle);
 
-    private int   mPosHandle;
-    private float mProjectionConstant;
-
-    private int mDensity;   //The number of points along each axis
-    private int mViewSize;
-
-    private int mVAO;
-    private int mVBO;
-
-    private float[] mPoints;
-    private float[] mPoints3d;
-    private FloatBuffer mPointsNativeBuffer;
-
-    public ComplexGraph(int density, int viewSize, float projectionConstant, int posHandle) {
         mDensity = density;
         mViewSize = viewSize;
-        mProjectionConstant = projectionConstant;
-        mPosHandle = posHandle;
 
-        mPoints   = new float[mDensity * mDensity * 4];
-        mPoints3d = new float[mDensity * mDensity * 3];
-
-        genPoints();
-        updateProjection();
-        genNativeBuffer();
-        genVBO();
-        genVAO();
+        init();
     }
 
-    private void genVBO() {
-        int[] VBOs = new int[1];
-        GLES30.glGenBuffers(1, VBOs, 0);
+    protected void genVertexData() {
+        mVertices      = new float[mDensity * mDensity * 4];
+        mVertices3d    = new float[mDensity * mDensity * 3];
+        mSecondaryData = new float[mDensity * mDensity * 3];
+        mIndices       = new int[(mDensity - 1) * (mDensity - 1) * 6];
 
-        mVBO = VBOs[0];
-
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mVBO);
-
-        GLES30.glBufferData(
-                GLES30.GL_ARRAY_BUFFER,
-                mPointsNativeBuffer.capacity() * BYTES_PER_FLOAT,
-                mPointsNativeBuffer,
-                GLES30.GL_STREAM_DRAW);
-
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
-    }
-
-    private void genVAO() {
-        int[] VAOArray = new int[1];
-        GLES30.glGenVertexArrays(1, VAOArray, 0);
-        mVAO = VAOArray[0];
-
-        GLES30.glBindVertexArray(mVAO);
-
-        GLES30.glEnableVertexAttribArray(mPosHandle);
-
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mVBO);
-        GLES30.glVertexAttribPointer(
-                mPosHandle,
-                3,
-                GLES30.GL_FLOAT,
-                false,
-                0,
-                0);
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
-
-        GLES30.glBindVertexArray(0);
-    }
-
-    private void genNativeBuffer() {
-        mPointsNativeBuffer = ByteBuffer.allocateDirect(
-                mPoints3d.length * BYTES_PER_FLOAT)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-
-        mPointsNativeBuffer.put(mPoints3d);
-        mPointsNativeBuffer.position(0);
-    }
-
-    private void updateProjection() {
-        for (int pointI = 0; pointI < mPoints.length / 4; pointI++) {  //Point iterator
-            float[] point = new float[4];
-            System.arraycopy(mPoints, pointI * 4, point, 0, 4);
-
-            for (int dim = 3; dim > 2; dim--) {    //Dimension we're projecting from (only project once)
-                for (int comp = 0; comp < dim - 1; comp++) {    //Component we're updating
-                    point[comp] *= mProjectionConstant / (mProjectionConstant + point[dim]);
-                }
-            }
-
-            mPoints3d[pointI * 3 + 0] = point[0];
-            mPoints3d[pointI * 3 + 1] = point[1];
-            mPoints3d[pointI * 3 + 2] = point[2];
-        }
-    }
-
-    private void genPoints() {
         for (int realIter = 0; realIter < mDensity; realIter++) {
             for (int imagIter = 0; imagIter < mDensity; imagIter++) {
-                float real = (realIter - (float) mDensity / 2.f) / (float) mDensity * (float) mViewSize;
-                float imag = (imagIter - (float) mDensity / 2.f) / (float) mDensity * (float) mViewSize;
 
-                ComplexNumber input = new ComplexNumber(real, imag);
+                float real = ((float) realIter - (float) (mDensity - 1) / 2.f) / (float) (mDensity - 1) * mViewSize;
+                float imag = ((float) imagIter - (float) (mDensity - 1) / 2.f) / (float) (mDensity - 1) * mViewSize;
 
-                //input.add()
-                input.mult(input);
+                int currentIndex = realIter * mDensity + imagIter;
 
+                ComplexNumber input  = new ComplexNumber(real, imag);
+                ComplexNumber result = new ComplexNumber(real, imag);
+                ComplexNumber deriv  = new ComplexNumber(real, imag);
 
-                mPoints[(realIter * mDensity + imagIter) * 4 + 0] = real;
-                mPoints[(realIter * mDensity + imagIter) * 4 + 1] = imag;
-                mPoints[(realIter * mDensity + imagIter) * 4 + 2] = input.getReal();
-                mPoints[(realIter * mDensity + imagIter) * 4 + 3] = input.getImaginary();
+                deriv.mult(2.f);    //derivative of x^2 = 2x
+
+                result.mult(input);
+
+                mVertices[currentIndex * 4 + 0] = real;
+                mVertices[currentIndex * 4 + 1] = imag;
+                mVertices[currentIndex * 4 + 2] = result.getReal();
+                mVertices[currentIndex * 4 + 3] = result.getImaginary();
+
+                mSecondaryData[currentIndex * 3 + 0] = (float) Math.pow(Math.sin(deriv.getReal()), 2.f);
+                mSecondaryData[currentIndex * 3 + 1] = (float) Math.pow(Math.sin(deriv.getImaginary()), 2.f);
+                mSecondaryData[currentIndex * 3 + 2] = (float) Math.pow(Math.sin(deriv.getMod()), 2.f);
+            }
+        }
+
+        for (int realIter = 0; realIter < mDensity - 1; realIter++) {
+            for (int imagIter = 0; imagIter < mDensity - 1; imagIter++) {
+                //First triangle
+                mIndices[(realIter * (mDensity - 1) + imagIter) * 6 + 0] = (realIter + 0) * mDensity + imagIter + 0;
+                mIndices[(realIter * (mDensity - 1) + imagIter) * 6 + 1] = (realIter + 1) * mDensity + imagIter + 0;
+                mIndices[(realIter * (mDensity - 1) + imagIter) * 6 + 2] = (realIter + 1) * mDensity + imagIter + 1;
+
+                //Second triangle
+                mIndices[(realIter * (mDensity - 1) + imagIter) * 6 + 3] = (realIter + 0) * mDensity + imagIter + 0;
+                mIndices[(realIter * (mDensity - 1) + imagIter) * 6 + 4] = (realIter + 0) * mDensity + imagIter + 1;
+                mIndices[(realIter * (mDensity - 1) + imagIter) * 6 + 5] = (realIter + 1) * mDensity + imagIter + 1;
             }
         }
     }
 
-    private void updateNativeBuffer() {
-        mPointsNativeBuffer.put(mPoints3d);
-        mPointsNativeBuffer.position(0);
-    }
+    @Override
+    protected void updateSecondaryData() {
+        /*for (int indexFaceStartI = 0; indexFaceStartI < mIndices.length; indexFaceStartI += 6) {   //index triangle start index
+            float[] vertex1 = new float[3];
+            float[] vertex2 = new float[3];
+            float[] vertex3 = new float[3];
 
-    private void updateVBO() {
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mVBO);
+            System.arraycopy(mVertices3d, mIndices[indexFaceStartI + 0] * 3, vertex1, 0, 3);
+            System.arraycopy(mVertices3d, mIndices[indexFaceStartI + 1] * 3, vertex2, 0, 3);
+            System.arraycopy(mVertices3d, mIndices[indexFaceStartI + 2] * 3, vertex3, 0, 3);
 
-        GLES30.glBufferSubData(
-                GLES30.GL_ARRAY_BUFFER,
-                0,
-                mPointsNativeBuffer.capacity() * BYTES_PER_FLOAT,
-                mPointsNativeBuffer);
+            float[] triSide1 = NDVector.sub(vertex2, vertex1);
+            float[] triSide2 = NDVector.sub(vertex3, vertex1);
 
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
-    }
+            float[] normal = NDVector.normalize(NDVector.cross(triSide1, triSide2));
 
-    public void rotate(float angle, int[] rotationPlane) {
-        for (int vertI = 0; vertI < mPoints.length; vertI += 4) {
-            float[] point = new float[4];
-            System.arraycopy(mPoints, vertI, point, 0, 4);
-            point = NDVector.rotate(point, angle, rotationPlane);
-            System.arraycopy(point, 0, mPoints, vertI, 4);
-        }
-    }
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 0] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 1] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 2] * 3, 3);
 
-    public void draw() {
-        updateProjection();
-        updateNativeBuffer();
-        updateVBO();
-
-        GLES30.glBindVertexArray(mVAO);
-        GLES30.glDrawArrays(GLES30.GL_POINTS, 0, mDensity * mDensity);
-        GLES30.glBindVertexArray(0);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 3] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 4] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 5] * 3, 3);
+        }*/
     }
 }

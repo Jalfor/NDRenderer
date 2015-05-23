@@ -51,7 +51,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mUniformBuffer = uniformBufferArray[0];
 
         mProjectionMatrix = new float[16];
-        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.01f, 100.f);  //TODO: change this in onSurfaceChanged
+        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
@@ -119,6 +119,12 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     public void onSurfaceCreated(EGLConfig config) {
         Log.i(TAG, "onSurfaceCreated");
         GLES30.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        GLES30.glClearDepthf(1.f);
+
+        GLES30.glEnable(GLES30.GL_DEPTH_TEST);
+        GLES30.glDepthMask(true);
+        GLES30.glDepthFunc(GLES30.GL_LEQUAL);
+        GLES30.glDepthRangef(0.0f, 1.0f);
 
         int[] shaders = new int[2];
 
@@ -141,7 +147,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         Matrix.translateM(mModelMatrix, 0, 0, 0, -10.f);
 
         //mHypercube = new Hypercube(4, mProjectionConstant, 10.f, 0, 1);
-        mComplexGraph = new ComplexGraph(50, 2, 10.f, 0);
+        mComplexGraph = new ComplexGraph(50, 1.5f, mProjectionConstant, 10.f, 0, 1);
 
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);

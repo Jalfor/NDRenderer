@@ -15,6 +15,7 @@ public class Hypercube extends NDShape {
      */
     public Hypercube(int dimensions, float projectionConstant, float viewDist, int vertexHandle, int normalHandle) {
         super(dimensions, projectionConstant, viewDist, vertexHandle, normalHandle);
+        init();
     }
 
     /**
@@ -105,7 +106,7 @@ public class Hypercube extends NDShape {
         mVertices3d = new float[mFaceCount * 4 * 3];
 
         //4 * number of faces vertices, each with 3 components
-        mNormals    = new float[mFaceCount * 4 * 3];
+        mSecondaryData    = new float[mFaceCount * 4 * 3];
 
         //6 * number of faces vertices (2 triangles per face * 3 points per triangle)
         mIndices    = new int[mFaceCount * 6];
@@ -164,11 +165,11 @@ public class Hypercube extends NDShape {
     }
 
     /**
-     * Updates the mNormals array based on mVertices3d (note that inwards and outwards are
+     * Updates the mSecondaryData array based on mVertices3d (note that inwards and outwards are
      * meaningless concepts when with a projection
      */
     @Override
-    protected void updateNormals() {
+    protected void updateSecondaryData() {
         for (int indexFaceStartI = 0; indexFaceStartI < mIndices.length; indexFaceStartI += 6) {   //index triangle start index
             float[] vertex1 = new float[3];
             float[] vertex2 = new float[3];
@@ -183,13 +184,13 @@ public class Hypercube extends NDShape {
 
             float[] normal = NDVector.normalize(NDVector.cross(triSide1, triSide2));
 
-            System.arraycopy(normal, 0, mNormals, mIndices[indexFaceStartI + 0] * 3, 3);
-            System.arraycopy(normal, 0, mNormals, mIndices[indexFaceStartI + 1] * 3, 3);
-            System.arraycopy(normal, 0, mNormals, mIndices[indexFaceStartI + 2] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 0] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 1] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 2] * 3, 3);
 
-            System.arraycopy(normal, 0, mNormals, mIndices[indexFaceStartI + 3] * 3, 3);
-            System.arraycopy(normal, 0, mNormals, mIndices[indexFaceStartI + 4] * 3, 3);
-            System.arraycopy(normal, 0, mNormals, mIndices[indexFaceStartI + 5] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 3] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 4] * 3, 3);
+            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 5] * 3, 3);
         }
     }
 }

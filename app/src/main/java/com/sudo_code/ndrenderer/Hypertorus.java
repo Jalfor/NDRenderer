@@ -16,6 +16,7 @@ public class Hypertorus extends NDShape {
      */
     public Hypertorus(int dimensions, float projectionConstant, float viewDist, int vertexHandle, int normalHandle) {
         super(dimensions, projectionConstant, viewDist, vertexHandle, normalHandle);
+        init();
     }
 
     /**
@@ -108,7 +109,7 @@ public class Hypertorus extends NDShape {
         mVertices3d = new float[Utils.powI(mSmoothness, mDimensions - 1) * 3];
 
         //Number of vertices * 3 components
-        mNormals    = new float[Utils.powI(mSmoothness, mDimensions - 1) * 3];
+        mSecondaryData    = new float[Utils.powI(mSmoothness, mDimensions - 1) * 3];
 
         //6 * number of faces vertices (2 triangles per face * 3 points per triangle)
         mIndices    = new int[mFaceCount * 6];
@@ -169,7 +170,7 @@ public class Hypertorus extends NDShape {
     }
 
     @Override
-    public void updateNormals() {
+    public void updateSecondaryData() {
 
     }
 }
