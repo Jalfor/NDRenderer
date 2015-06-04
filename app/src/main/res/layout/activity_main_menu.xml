@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:orientation="vertical"
+    android:weightSum="1"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="NDRenderer"
+        android:id="@+id/title"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="20dp" />
+
+    <Button
+        android:layout_width="196dp"
+        android:layout_height="105dp"
+        android:text="Hypercube"
+        android:id="@+id/hypercube_button"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="20dp"
+        android:onClick="hypercubeClicked" />
+
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        android:text="Hypertorus"
+        android:id="@+id/hypertorus_button"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="20dp"
+        android:onClick="hypertorusClicked" />
+
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        android:text="Complex Parabola"
+        android:id="@+id/complex_para_button"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="20dp"
+        android:onClick="complexGraphClicked" />
+</LinearLayout>

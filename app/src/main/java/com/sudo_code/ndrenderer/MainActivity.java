@@ -1,6 +1,7 @@
 package com.sudo_code.ndrenderer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -40,8 +41,8 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private long mPrevTime    = System.nanoTime();
     private long mFrameTime   = 0;
 
-    private Hypercube mHypercube;
-    private ComplexGraph mComplexGraph;
+    private String mObjectType;
+    private NDShape mObject;    //The thing we're displaying
 
     private float[]   mModelMatrix; //Stick this into the class probably eventually
 
@@ -97,6 +98,10 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         mOverlayView = (CardboardOverlayView) findViewById(R.id.overlay);
+
+        //We can't initialize mObject here because the OpenGL context hasn't been created here
+        Intent intent = getIntent();
+        mObjectType = intent.getStringExtra("objectType");
     }
 
     @Override
@@ -121,18 +126,47 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         GLES30.glClearDepthf(1.f);
 
-        GLES30.glEnable(GLES30.GL_DEPTH_TEST);
-        GLES30.glDepthMask(true);
-        GLES30.glDepthFunc(GLES30.GL_LEQUAL);
-        GLES30.glDepthRangef(0.0f, 1.0f);
-
         int[] shaders = new int[2];
+
+        if (mObjectType.equals("hypercube")) {
+            GLES30.glEnable(GLES30.GL_BLEND);
+            GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+
+            shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.shape_vert, this);
+            shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.shape_frag, this);
+
+            mObject = new Hypercube(4, mProjectionConstant, 10.f, 0, 1);
+        }
+
+        else if (mObjectType.equals("hypertorus")) {
+            GLES30.glEnable(GLES30.GL_BLEND);
+            GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
+
+            shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.shape_vert, this);
+            shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.shape_frag, this);
+
+            mObject = new Hypertorus(4, mProjectionConstant, 10.f, 0, 1);
+        }
+
+        else if (mObjectType.equals("complexGraph")) {
+            GLES30.glEnable(GLES30.GL_DEPTH_TEST);
+            GLES30.glDepthMask(true);
+            GLES30.glDepthFunc(GLES30.GL_LEQUAL);
+            GLES30.glDepthRangef(0.0f, 1.0f);
+
+            shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.c_graph_vert, this);
+            shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.c_graph_frag, this);
+
+            mObject = new ComplexGraph(50, 1.5f, mProjectionConstant, 10.f, 0, 1);
+        }
+
+
 
         //shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.shape_vert, this);
         //shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.shape_frag, this);
 
-        shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.c_graph_vert, this);
-        shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.c_graph_frag, this);
+        //shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.c_graph_vert, this);
+        //shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.c_graph_frag, this);
 
         mProgram = Utils.genProgram(shaders);
         Utils.delShaders(shaders);
@@ -145,12 +179,6 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mModelMatrix = new float[16];
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.translateM(mModelMatrix, 0, 0, 0, -10.f);
-
-        //mHypercube = new Hypercube(4, mProjectionConstant, 10.f, 0, 1);
-        mComplexGraph = new ComplexGraph(50, 1.5f, mProjectionConstant, 10.f, 0, 1);
-
-        GLES30.glEnable(GLES30.GL_BLEND);
-        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
 
         Utils.checkGLError("onSurfaceCreated");
     }
@@ -165,11 +193,8 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mFrameTime = System.nanoTime() - mPrevTime;
         mPrevTime  = System.nanoTime();
 
-        //mHypercube.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {0, 2});
-        //mHypercube.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {2, 3});
-
-        mComplexGraph.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {0, 2});
-        mComplexGraph.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {2, 3});
+        mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {0, 2});
+        mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {2, 3});
     }
 
     /**
@@ -191,8 +216,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, 0);
 
         GLES30.glUseProgram(mProgram);
-        mComplexGraph.draw();
-        //mHypercube.draw();
+        mObject.draw();
         GLES30.glUseProgram(0);
     }
 
