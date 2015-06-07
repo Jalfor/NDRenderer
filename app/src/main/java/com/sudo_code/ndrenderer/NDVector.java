@@ -135,22 +135,4 @@ public class NDVector {
 
         return result;
     }
-
-    /**
-     * Finds the triangle center by averaging each of the components
-     *
-     * @param vertex1 The first vertex of the triangle
-     * @param vertex2 The second vertex of the triangle
-     * @param vertex3 The third vertex of the triangle
-     * @return The center of the triangle
-     */
-    public static float[] getTriangleCenter(float[] vertex1, float[] vertex2, float[] vertex3) {
-        float[] center = new float[vertex1.length];
-
-        for (int i = 0; i < vertex1.length; i++) {
-            center[i] = (vertex1[i] + vertex2[i] + vertex3[i]) / 3;
-        }
-
-        return center;
-    }
 }

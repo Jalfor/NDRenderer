@@ -102,6 +102,11 @@ class Utils {
         return null;
     }
 
+    /**
+     * Generates a vertex or fragment shader based on the type and resource ID
+     *
+     * @return A handle to the shader
+     */
     public static int genShader(int type, int resId, Activity activity) {
         String code = readRawTextFile(resId, activity);
         int shader = GLES30.glCreateShader(type);
@@ -127,12 +132,20 @@ class Utils {
         return shader;
     }
 
+    /**
+     * Deletes an array of shaders
+     */
     public static void delShaders(int[] shaders) {
         for (int i = 0; i < shaders.length; i++) {
             GLES30.glDeleteShader(shaders[i]);
         }
     }
 
+    /**
+     * Generates a program based off an array of shaders
+     *
+     * @return A handle to the program
+     */
     public static int genProgram(int[] shaders) {
         int program = GLES30.glCreateProgram();
 

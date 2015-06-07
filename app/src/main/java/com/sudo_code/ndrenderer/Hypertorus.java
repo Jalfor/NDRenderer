@@ -51,14 +51,22 @@ public class Hypertorus extends NDShape {
         return rotMatrix;
     }
 
+    /**
+     * Recursive function called initially from genVertexData to generate all points that are in
+     * a rotation around that point.
+     *
+     * @param torusVecDimension The dimension we're generating (0 indexed)
+     * @param currentVector The current position of the point
+     * @param prevTorusVec The offset added by the previous dimension
+     */
     void genTorusVertices(int torusVecDimension, float[] currentVector, float[] prevTorusVec) {
-        float[][] rotMatrix = genNDTorusVecRotMatrix(torusVecDimension - 1, prevTorusVec);    //dimensions for genNDTor... is 0 indexed
+        float[][] rotMatrix = genNDTorusVecRotMatrix(torusVecDimension, prevTorusVec);
 
-        if (torusVecDimension < mDimensions) {
+        if (torusVecDimension < mDimensions - 1) {  //This isn't going to be the final position
             for (int i = 0; i < mSmoothness; i++) {
                 float[] circleVec = new float[mDimensions];
-                circleVec[0] = (float) (Math.cos(i * 2.f * Math.PI / mSmoothness) / Math.pow(2.f, torusVecDimension - 2));
-                circleVec[1] = (float) (Math.sin(i * 2.f * Math.PI / mSmoothness) / Math.pow(2.f, torusVecDimension - 2));
+                circleVec[0] = (float) (Math.cos(i * 2.f * Math.PI / mSmoothness) / Math.pow(2.f, torusVecDimension - 1));
+                circleVec[1] = (float) (Math.sin(i * 2.f * Math.PI / mSmoothness) / Math.pow(2.f, torusVecDimension - 1));
 
                 for (int fillI = 2; fillI < mDimensions; fillI++) {
                     circleVec[fillI] = 0;
@@ -73,11 +81,11 @@ public class Hypertorus extends NDShape {
             }
         }
 
-        else {
+        else {  //We're at the final dimension
             for (int i = 0; i < mSmoothness; i++) {
                 float[] circleVec = new float[mDimensions];
-                circleVec[0] = (float) (Math.cos(i * 2.f * Math.PI / mSmoothness) / Math.pow(2.f, torusVecDimension - 2));
-                circleVec[1] = (float) (Math.sin(i * 2.f * Math.PI / mSmoothness) / Math.pow(2.f, torusVecDimension - 2));
+                circleVec[0] = (float) (Math.cos(i * 2.f * Math.PI / mSmoothness) / Math.pow(2.f, torusVecDimension - 1));
+                circleVec[1] = (float) (Math.sin(i * 2.f * Math.PI / mSmoothness) / Math.pow(2.f, torusVecDimension - 1));
 
                 for (int fillI = 2; fillI < mDimensions; fillI++) {
                     circleVec[fillI] = 0;
@@ -116,17 +124,25 @@ public class Hypertorus extends NDShape {
 
         mVertI = 0;
 
+        //Generate the vertex positions
         for (int i = 0; i < mSmoothness; i++) {
             float[] torusVec = new float[mDimensions];
             torusVec[0] = (float) Math.cos(i * 2.f * Math.PI / mSmoothness);
             torusVec[1] = (float) Math.sin(i * 2.f * Math.PI / mSmoothness);
 
-            genTorusVertices(3, torusVec, torusVec);
+            genTorusVertices(2, torusVec, torusVec);
         }
 
+        //Generate the faces
         mVertI = 0;
         for (int dim = 3; dim <= mDimensions; dim++) {
             for (int i = 0; i < mVertices.length / mDimensions; i++) {
+
+                /*
+                 * The different directions from a point are mSmoothness to different powers.
+                 * This is complicated however by the fact that we have to deal with wrap around,
+                 * hence all the modulus and floor stuff.
+                 */
 
                 //First triangle
 

@@ -14,6 +14,9 @@ public class ComplexGraph extends NDShape {
         init();
     }
 
+    /**
+     * Generates the position and derivative values of the points on the complex graph
+     */
     protected void genVertexData() {
         mVertices      = new float[mDensity * mDensity * 4];
         mVertices3d    = new float[mDensity * mDensity * 3];

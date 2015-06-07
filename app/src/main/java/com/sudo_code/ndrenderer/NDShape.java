@@ -27,7 +27,7 @@ public abstract class NDShape {
     protected int   mDimensions;
     protected float mProjectionConstant;
     private   float mViewDist;
-    private   int   mPosHandle;
+    private   int   mPosHandle;     //Vertex attribute indices
     private   int   mSecondaryHandle;
 
     protected int mFaceCount;
@@ -49,13 +49,22 @@ public abstract class NDShape {
         mSecondaryHandle    = secondayHandle;
     }
 
+    /**
+     * Allocates and generates the primary and secondary vertex data as well as the indices
+     */
     protected abstract void genVertexData();
+
+    /**
+     * Updates the secondary vertex data (this is probably going to be normals or colors which
+     * could need to be regenerated while the primary data is position data in model space so
+     * doesn't change)
+     */
     protected abstract void updateSecondaryData();
 
     /**
      * MUST be called from subclass constructors. You might ask why this isn't in the constructor,
      * but Java, in it's infinite wisdom doesn't let you modify variables before calling the
-     * super constructor, making it pretty much impossible to modify superclass behaviour
+     * super constructor, making it pretty much impossible to modify superclass initialization behaviour
      */
     protected void init() {
         genVertexData();
