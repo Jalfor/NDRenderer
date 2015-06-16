@@ -56,6 +56,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         mProjectionMatrix = new float[16];
         Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
+        float[] color = new float[4];
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
