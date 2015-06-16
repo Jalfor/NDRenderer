@@ -5,5 +5,79 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_main_menu">MainMenu</string>
+    <string name="title_activity_help_screen">HelpScreen</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="help_text">So, you might be wondering what it means to have four, five, six and so on dimensions.  Pretty much,
+        the number of dimensions is the number of (signed) numbers needed to define any point relative to any
+        other point with an orientation. The orientation is just the direction and size of the basis
+        vectors, that is, which direction is up, sideways and away. What this means, is that zero
+        dimensional space would be just a point with no dimensions since if you have no numbers, then
+        to be able to define any point relative to any other with an orientation, you can only have one
+        point. With one dimension, you would have a line and the orientation would determine which
+        direction along the line is positive and which negative and how big the scale is. With two
+        dimensions, you would have a plane, the basis vectors determining which direction the x and y
+        coordinates point to. (By the way, x and y don\'t necessarily have to be orthogonal (perpendicular
+        to each other), but they can\'t be scalar multiples of each other (along the same line)). three
+        dimensional space is what our universe is (in everyday existence at least), adding one more
+        direction. Once again, while the new basis vector (direction with a scale) doesn\'t have to be
+        perpendicular to the plane, most of the time it is and it can\'t lie on the plane. This of course
+        can be extended to higher dimensions. For four dimensional space, you add another direction that
+        doesn\'t lie on the same hyperplane as XYZ. Trying to get any sort of concept of this is rather
+        difficult as whenever you imagine something in your head, you imagine a 2D image as that is what
+        we see with our eyes. Trying to look at a 4D object on a 2D plane is like trying to look at a
+        cube with a screen with only one row. However, if you can get your head around the 3D projection
+        of the 4D object then an idea of what\'s happening can be achieved. Projecting 4D to 3D in this
+        program is achieved pretty much the same way as 3D to 2D projection, which is something everyone
+        is familiar with since the view in each of your eyes is a 2D projection of 3D space and any
+        computer image of a 3D object onto a monitor is a projection. The principle behind it is actually
+        quite simple. A line is drawn from the point to wherever you decide to stick the eye. You then
+        put a hyperplane somewhere and put the projected point wherever the line from the point to the
+        eye intersects the hyperplane we\'re projecting to. The eye is generally placed at the origin
+        and the hyperplane placed a unit away from the eye, perpendicular to the dimension being removed.
+        This creates a couple of similar triangles and it is a trivial matter to get it working, though
+        it is more complicated if you want to deal with clipping. In this program, I\'ve just kept
+        everything in a range where clipping is unnecessary, but if it goes outside that, stuff gets
+        mirrored and flies off to miles away because the points go close to and behind the eye.</string>
+    <string name="title_activity_hypercube_help">HypercubeHelp</string>
+    <string name="hypercube_help_text">A hypercube is an object in n dimensions that has uniform extents in all dimensions along the
+        shape. It can be constructed by taking a line of the size of the hypercube, then copying that
+        into the next dimension and connecting it up. Then, take the resulting square and copy that,
+        then connect it up. That will give you a cube. To get a 4D hypercube, copy that cube into the
+        fourth dimension and connect it up with cubes. When projected into three dimensions, the outer
+        cube is the one closer in the fourth dimension and the inner cube is the one further away. The
+        other cubes are connected them. Of course, these cubes will not look like cubes most of the time
+        when projected because of the distortion (a square projected from three to two dimensions lying
+        at an angle won\'t look like a square anymore). Because I wanted to be able to implement lighting
+        in this program, I needed to make sure that each vertex belonged to one face only because I had
+        to attach vertex normals to it, so I couldn\'t actually generate the vertices with this copying
+        method. Instead, I had to do a rather complicated thing of iterating through combinations of
+        axes and combinations of values of other axes to iterate through the faces and fill each one of
+        them in.</string>
+    <string name="title_activity_hypertorus_help">HypertorusHelp</string>
+    <string name="hypertorus_help_text">A hypertorus in the way I have decided to define it is a just an extension of a torus (a donut).
+        I two dimensional hypertorus would be a hollow circle I guess, then, to extend that to three
+        dimensions, you rotate around the 2D circle on the plane of the new dimension and towards
+        the center of the circle. To extend that to four dimensions, you take each point on the torus
+        and rotate that on the plane of the previous offset added when extending it to three dimensions
+        and the new dimension. This is achieved using some rotation matrices and recursion. To connect
+        up the vertices is a bit messy. Because there is some fixed resolution around each rotation
+        since I don\'t have an infinite amount of processing power and memory, the index offset of going
+        to the next vertex in various directions is some power of that resolution. Then there is the
+        problem of overflow as it wraps around (obviously), which I solved using floor functions and
+        the remainder operator (% ISTN\'T a modulus operator in Java and I really wish people wouldn\'t
+        call it that). Anyway, unfortunately, due to the huge number of vertices and faces on a
+        hypertorus, you can\'t go to as many dimensions, especially when using face sorting for
+        transparency.</string>
+    <string name="title_activity_complex_graph_help">Complex Graph Help</string>
+    <string name="complex_graph_help_text">A \"complex graph\" is a graph that graphs a complex
+        function. That is, a function that takes a complex number as an input and outputs a complex
+        number for every complex number in its domain. (A complex number is a number of the form
+        a + bi where a and b are real numbers and i is the square root of -1. A complex parabola
+        for example, would be (a + bi)^2 = a^2 - b^2 + 2abi. The coloring is based on the real and
+        imaginary parts of the derivative as well as its modulus. These are then linearly interpolated
+        in 3D space. Of course, this isn\'t precisely accurate for almost all functions, but it would
+        be exceptionally complicated and performance draining to fix that as I\'d need to work it out
+        in the fragment shader instead of relying on the smooth shader qualifier.</string>
 
 </resources>

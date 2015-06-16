@@ -61,4 +61,24 @@ public class MainMenu extends Activity {
         myIntent.putExtra("objectType", "complexGraph");
         MainMenu.this.startActivity(myIntent);
     }
+
+    public void helpClicked(View view) {
+        Intent myIntent = new Intent(MainMenu.this, HelpScreen.class);
+        MainMenu.this.startActivity(myIntent);
+    }
+
+    public void hypercubeHelpClicked(View view) {
+        Intent myIntent = new Intent(MainMenu.this, HypercubeHelp.class);
+        MainMenu.this.startActivity(myIntent);
+    }
+
+    public void hypertorusHelpClicked(View view) {
+        Intent myIntent = new Intent(MainMenu.this, HypertorusHelp.class);
+        MainMenu.this.startActivity(myIntent);
+    }
+
+    public void complexParabolaHelpClicked(View view) {
+        Intent myIntent = new Intent(MainMenu.this, ComplexGraphHelp.class);
+        MainMenu.this.startActivity(myIntent);
+    }
 }

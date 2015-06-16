@@ -30,22 +30,6 @@ class Utils {
     }
 
     /**
-     * Projects a vertex down to 3D
-     *
-     * @param vertex The vertex to be projected
-     * @param projectionConstant The camera's distance to the hypervolume of projection (MUST BE GREATER THAN GREATEST EXTENT OF SHAPE)
-     */
-    public static float[] projectTo3D(float[] vertex, float projectionConstant) {
-        float[] projVertex = vertex.clone();
-
-        while (projVertex.length > 3) {
-            projVertex = projectDown(projVertex, projectionConstant);
-        }
-
-        return projVertex;
-    }
-
-    /**
      * Integer exponentiation by squaring
      *
      * @param base Base of exponentiation

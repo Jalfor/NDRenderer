@@ -1,0 +1,40 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:background="#ffffffff"
+    tools:context="com.sudo_code.ndrenderer.HelpScreen">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Hypertorus Help"
+            android:id="@+id/title"
+            android:layout_gravity="center_horizontal|top" />
+
+        <EditText
+            android:layout_width="316dp"
+            android:layout_height="479dp"
+            android:ems="10"
+            android:id="@+id/editText"
+            android:layout_gravity="center"
+            android:text="@string/hypertorus_help_text"
+            android:inputType="none"
+            android:editable="false"
+            android:elegantTextHeight="false"
+            android:enabled="true"
+            android:typeface="normal"
+            android:textColor="#000000" />
+
+    </FrameLayout>
+
+</FrameLayout>

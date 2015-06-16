@@ -44,8 +44,11 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private String mObjectType;
     private NDShape mObject;    //The thing we're displaying
 
-    private float[]   mModelMatrix; //Stick this into the class probably eventually
+    private float[]   mModelMatrix; //TODO Stick this into the class probably eventually
 
+    /**
+     * Generate the uniform buffer that will store the projection matrix and the projection constant
+     */
     private void genUniformBuffer() {
         int[] uniformBufferArray = new int[1];
         GLES30.glGenBuffers(1, uniformBufferArray, 0);
@@ -159,14 +162,6 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
             mObject = new ComplexGraph(50, 1.5f, mProjectionConstant, 10.f, 0, 1);
         }
-
-
-
-        //shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.shape_vert, this);
-        //shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.shape_frag, this);
-
-        //shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.c_graph_vert, this);
-        //shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.c_graph_frag, this);
 
         mProgram = Utils.genProgram(shaders);
         Utils.delShaders(shaders);

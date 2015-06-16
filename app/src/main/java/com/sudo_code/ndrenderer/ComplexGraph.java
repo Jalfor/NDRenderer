@@ -52,6 +52,7 @@ public class ComplexGraph extends NDShape {
 
         for (int realIter = 0; realIter < mDensity - 1; realIter++) {
             for (int imagIter = 0; imagIter < mDensity - 1; imagIter++) {
+
                 //First triangle
                 mIndices[(realIter * (mDensity - 1) + imagIter) * 6 + 0] = (realIter + 0) * mDensity + imagIter + 0;
                 mIndices[(realIter * (mDensity - 1) + imagIter) * 6 + 1] = (realIter + 1) * mDensity + imagIter + 0;
