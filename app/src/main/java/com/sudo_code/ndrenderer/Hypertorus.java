@@ -2,7 +2,7 @@ package com.sudo_code.ndrenderer;
 
 public class Hypertorus extends NDShape {
 
-    private final int mSmoothness = 15;    //The number of vertices on the circles the hypertorus is based off
+    private int mSmoothness;    //The number of vertices on the circles the hypertorus is based off
     private int mVertI; //A counter for what vertex we're up to
 
     /**
@@ -14,8 +14,11 @@ public class Hypertorus extends NDShape {
      * @param vertexHandle The attribute index of the vertex position
      * @param normalHandle The attribute index of the vertex normal
      */
-    public Hypertorus(int dimensions, float projectionConstant, float viewDist, int vertexHandle, int normalHandle) {
+    public Hypertorus(int dimensions, float projectionConstant, float viewDist, int vertexHandle, int normalHandle, int smoothness) {
         super(dimensions, projectionConstant, viewDist, vertexHandle, normalHandle);
+
+        mSmoothness = smoothness;
+
         init();
     }
 

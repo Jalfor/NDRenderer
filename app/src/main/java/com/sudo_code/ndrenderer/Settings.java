@@ -24,8 +24,11 @@ public class Settings extends Activity implements AdapterView.OnItemSelectedList
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_settings);
 
-        Spinner spinner = (Spinner) findViewById(R.id.color_spinner);
-        spinner.setOnItemSelectedListener(this);
+        Spinner spinner1 = (Spinner) findViewById(R.id.color_spinner);
+        spinner1.setOnItemSelectedListener(this);
+
+        Spinner spinner2 = (Spinner) findViewById(R.id.dim_spinner);
+        spinner2.setOnItemSelectedListener(this);
 
         SharedPreferences mSharedPref = this.getSharedPreferences("settings", Context.MODE_PRIVATE);
         mEditor = mSharedPref.edit();
@@ -45,7 +48,12 @@ public class Settings extends Activity implements AdapterView.OnItemSelectedList
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
 
-        if (parent.getItemAtPosition(pos).toString().equals("Red")) {
+        if (parent.getItemAtPosition(pos).toString().equals("White")) {
+            mEditor.putString("color", "White");
+            mEditor.commit();
+        }
+
+        else if (parent.getItemAtPosition(pos).toString().equals("Red")) {
             mEditor.putString("color", "Red");
             mEditor.commit();
         }
@@ -57,6 +65,26 @@ public class Settings extends Activity implements AdapterView.OnItemSelectedList
 
         else if (parent.getItemAtPosition(pos).toString().equals("Blue")) {
             mEditor.putString("color", "Blue");
+            mEditor.commit();
+        }
+
+        else if (parent.getItemAtPosition(pos).toString().equals("3D")) {
+            mEditor.putInt("dims", 3);
+            mEditor.commit();
+        }
+
+        else if (parent.getItemAtPosition(pos).toString().equals("4D")) {
+            mEditor.putInt("dims", 4);
+            mEditor.commit();
+        }
+
+        else if (parent.getItemAtPosition(pos).toString().equals("5D")) {
+            mEditor.putInt("dims", 5);
+            mEditor.commit();
+        }
+
+        else if (parent.getItemAtPosition(pos).toString().equals("6D")) {
+            mEditor.putInt("dims", 6);
             mEditor.commit();
         }
     }

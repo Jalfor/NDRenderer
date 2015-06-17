@@ -81,9 +81,16 @@
         in the fragment shader instead of relying on the smooth shader qualifier.</string>
     <string name="title_activity_settings">Settings</string>
     <string-array name="color_options">
+        <item>White</item>
         <item>Red</item>
         <item>Green</item>
         <item>Blue</item>
+    </string-array>
+    <string-array name="dim_options">
+        <item>3D</item>
+        <item>4D</item>
+        <item>5D</item>
+        <item>6D</item>
     </string-array>
 
 </resources>

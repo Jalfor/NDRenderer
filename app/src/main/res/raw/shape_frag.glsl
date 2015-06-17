@@ -15,9 +15,8 @@ layout(std140) uniform Globals
 void main()
 {
     vec3 dirLight = normalize(vec3(1.f, -1.f, -1.f));
-    vec3 diffuseColor = vec3(0.2f, 1.f, 1.f);
 
-    outputColor = color;
-    //outputColor = vec4(0.25f * (fNormal + 3.f), 0.4f);
-    //outputColor = vec4(diffuseColor * 0.5f * abs(dot(fNormal, dirLight)), 0.4f);
+    //outputColor = color;  //Plain color
+    //outputColor = vec4(0.25f * (fNormal + 3.f), 0.4f);    //Normal coloring
+    outputColor = vec4(color.xyz * (abs(dot(fNormal, dirLight))), color.w);    //Directional lighting
 }

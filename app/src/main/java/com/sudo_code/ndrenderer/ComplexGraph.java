@@ -68,27 +68,6 @@ public class ComplexGraph extends NDShape {
 
     @Override
     protected void updateSecondaryData() {
-        /*for (int indexFaceStartI = 0; indexFaceStartI < mIndices.length; indexFaceStartI += 6) {   //index triangle start index
-            float[] vertex1 = new float[3];
-            float[] vertex2 = new float[3];
-            float[] vertex3 = new float[3];
 
-            System.arraycopy(mVertices3d, mIndices[indexFaceStartI + 0] * 3, vertex1, 0, 3);
-            System.arraycopy(mVertices3d, mIndices[indexFaceStartI + 1] * 3, vertex2, 0, 3);
-            System.arraycopy(mVertices3d, mIndices[indexFaceStartI + 2] * 3, vertex3, 0, 3);
-
-            float[] triSide1 = NDVector.sub(vertex2, vertex1);
-            float[] triSide2 = NDVector.sub(vertex3, vertex1);
-
-            float[] normal = NDVector.normalize(NDVector.cross(triSide1, triSide2));
-
-            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 0] * 3, 3);
-            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 1] * 3, 3);
-            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 2] * 3, 3);
-
-            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 3] * 3, 3);
-            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 4] * 3, 3);
-            System.arraycopy(normal, 0, mSecondaryData, mIndices[indexFaceStartI + 5] * 3, 3);
-        }*/
     }
 }

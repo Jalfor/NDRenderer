@@ -208,7 +208,7 @@ public abstract class NDShape {
 
             for (int dim = mDimensions - 1; dim > 2; dim--) {    //Dimension we're projecting from
                 for (int comp = 0; comp < dim - 1; comp++) {    //Component we're updating
-                    vertex[comp] *= mProjectionConstant / (mProjectionConstant + vertex[dim]);
+                    vertex[comp] *= Math.abs(mProjectionConstant - 1) / /* mProjectionConstant */ (mProjectionConstant + vertex[dim]);
                 }
             }
 
@@ -218,7 +218,7 @@ public abstract class NDShape {
         }
 
         updateSecondaryData();
-        //sortFaces();
+        sortFaces();
     }
 
     /**

@@ -51,6 +51,8 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
     private float[]   mModelMatrix; //TODO Stick this into the class probably eventually
 
+    private int mDimensions;
+
     /**
      * Generate the uniform buffer that will store the projection matrix and the projection constant
      */
@@ -60,8 +62,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mUniformBuffer = uniformBufferArray[0];
 
         mProjectionMatrix = new float[16];
-        Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
-        setColor(); //mColor (float[4])
+        Matrix.perspectiveM(mProjectionMatrix, 0, 30.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         mUniformBufferData = ByteBuffer.allocateDirect(
@@ -98,8 +99,6 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
      */
     private void setColor() {
         mColor = new float[4];
-
-        mSharedPref = this.getSharedPreferences("settings", Context.MODE_PRIVATE);
         String colorStr = mSharedPref.getString("color", "White");
 
         if (colorStr.equals("White")) {
@@ -147,6 +146,10 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         mOverlayView = (CardboardOverlayView) findViewById(R.id.overlay);
 
+        mSharedPref = this.getSharedPreferences("settings", Context.MODE_PRIVATE);
+        mDimensions = mSharedPref.getInt("dims", 4);
+        setColor();
+
         //We can't initialize mObject here because the OpenGL context hasn't been created here
         Intent intent = getIntent();
         mObjectType = intent.getStringExtra("objectType");
@@ -183,7 +186,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
             shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.shape_vert, this);
             shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.shape_frag, this);
 
-            mObject = new Hypercube(4, mProjectionConstant, 10.f, 0, 1);
+            mObject = new Hypercube(mDimensions, mProjectionConstant, 10.f, 0, 1);
         }
 
         else if (mObjectType.equals("hypertorus")) {
@@ -193,10 +196,12 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
             shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.shape_vert, this);
             shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.shape_frag, this);
 
-            mObject = new Hypertorus(4, mProjectionConstant, 10.f, 0, 1);
+            mObject = new Hypertorus(mDimensions, mProjectionConstant, 10.f, 0, 1, 10);
         }
 
         else if (mObjectType.equals("complexGraph")) {
+            mDimensions = 4;
+
             GLES30.glEnable(GLES30.GL_DEPTH_TEST);
             GLES30.glDepthMask(true);
             GLES30.glDepthFunc(GLES30.GL_LEQUAL);
@@ -234,7 +239,10 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mPrevTime  = System.nanoTime();
 
         mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {0, 2});
-        mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[] {2, 3});
+
+        if (mDimensions > 3) {
+            mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[]{2, 3});
+        }
     }
 
     /**
