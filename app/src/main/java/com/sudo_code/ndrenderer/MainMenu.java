@@ -81,4 +81,9 @@ public class MainMenu extends Activity {
         Intent myIntent = new Intent(MainMenu.this, ComplexGraphHelp.class);
         MainMenu.this.startActivity(myIntent);
     }
+
+    public void settingsClicked(View view) {
+        Intent myIntent = new Intent(MainMenu.this, Settings.class);
+        MainMenu.this.startActivity(myIntent);
+    }
 }

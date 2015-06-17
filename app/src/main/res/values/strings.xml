@@ -79,5 +79,11 @@
         in 3D space. Of course, this isn\'t precisely accurate for almost all functions, but it would
         be exceptionally complicated and performance draining to fix that as I\'d need to work it out
         in the fragment shader instead of relying on the smooth shader qualifier.</string>
+    <string name="title_activity_settings">Settings</string>
+    <string-array name="color_options">
+        <item>Red</item>
+        <item>Green</item>
+        <item>Blue</item>
+    </string-array>
 
 </resources>

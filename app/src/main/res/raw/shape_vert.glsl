@@ -8,6 +8,7 @@ flat out vec3 fNormal;   //Normal for the fragment shader
 layout(std140) uniform Globals
 {
     mat4 projectionMatrix;
+    vec4 color;
     float projectionConstant;
     float[3] padding;
 };

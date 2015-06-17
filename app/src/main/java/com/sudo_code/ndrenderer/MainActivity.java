@@ -2,6 +2,7 @@ package com.sudo_code.ndrenderer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -29,11 +30,15 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private Vibrator mVibrator;
     private CardboardOverlayView mOverlayView;
 
+    SharedPreferences mSharedPref;
+    float[] mColor;
+
     private int mProgram;
 
     private int mProgramUniformBlockIndex;
     private int mUniformBuffer;
     private final int mUniformBufferkBindingIndex = 0;
+    private FloatBuffer mUniformBufferData;
 
     private final float mProjectionConstant = 3.f;
     private float[] mProjectionMatrix;
@@ -56,25 +61,26 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         mProjectionMatrix = new float[16];
         Matrix.perspectiveM(mProjectionMatrix, 0, 45.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
-        float[] color = new float[4];
+        setColor(); //mColor (float[4])
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
-        FloatBuffer uniformBufferData = ByteBuffer.allocateDirect(
-                mProjectionMatrix.length * BYTES_PER_FLOAT + 4 * BYTES_PER_FLOAT)
+        mUniformBufferData = ByteBuffer.allocateDirect(
+                (mProjectionMatrix.length + mColor.length + 4) * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
 
-        uniformBufferData.put(mProjectionMatrix);
-        uniformBufferData.put(mProjectionConstant);
-        uniformBufferData.put(padding);
-        uniformBufferData.position(0);
+        mUniformBufferData.put(mProjectionMatrix);
+        mUniformBufferData.put(mColor);
+        mUniformBufferData.put(mProjectionConstant);
+        mUniformBufferData.put(padding);
+        mUniformBufferData.position(0);
 
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, mUniformBuffer);
 
         GLES30.glBufferData(
                 GLES30.GL_UNIFORM_BUFFER,
-                uniformBufferData.capacity() * BYTES_PER_FLOAT,
-                uniformBufferData,
+                mUniformBufferData.capacity() * BYTES_PER_FLOAT,
+                mUniformBufferData,
                 GLES30.GL_STREAM_DRAW);
 
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, 0);
@@ -84,7 +90,45 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
                 mUniformBufferkBindingIndex,
                 mUniformBuffer,
                 0,
-                uniformBufferData.capacity());
+                mUniformBufferData.capacity());
+    }
+
+    /**
+     * Sets mColor based on whatever got stored in the settings
+     */
+    private void setColor() {
+        mColor = new float[4];
+
+        mSharedPref = this.getSharedPreferences("settings", Context.MODE_PRIVATE);
+        String colorStr = mSharedPref.getString("color", "White");
+
+        if (colorStr.equals("White")) {
+            mColor[0] = 1.f;
+            mColor[1] = 1.f;
+            mColor[2] = 1.f;
+            mColor[3] = 0.1f;
+        }
+
+        else if (colorStr.equals("Red")) {
+            mColor[0] = 1.f;
+            mColor[1] = 0.f;
+            mColor[2] = 0.f;
+            mColor[3] = 0.1f;
+        }
+
+        else if (colorStr.equals("Green")) {
+            mColor[0] = 0.f;
+            mColor[1] = 1.f;
+            mColor[2] = 0.f;
+            mColor[3] = 0.1f;
+        }
+
+        else if (colorStr.equals("Blue")) {
+            mColor[0] = 0.f;
+            mColor[1] = 0.f;
+            mColor[2] = 1.f;
+            mColor[3] = 0.1f;
+        }
     }
 
     /**
@@ -206,9 +250,18 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         Matrix.multiplyMM(eyeProjectionMatrix, 0, eye.getEyeView(), 0, mModelMatrix, 0);
         Matrix.multiplyMM(eyeProjectionMatrix, 0, mProjectionMatrix, 0, eyeProjectionMatrix, 0);
 
+        mUniformBufferData.position(0);
+        mUniformBufferData.put(eyeProjectionMatrix);
+        mUniformBufferData.position(0);
+
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, mUniformBuffer);
-        GLES30.glBufferSubData(GLES30.GL_UNIFORM_BUFFER, 0, eyeProjectionMatrix.length * BYTES_PER_FLOAT,
-                FloatBuffer.wrap(eyeProjectionMatrix));
+
+        GLES30.glBufferSubData(
+                GLES30.GL_UNIFORM_BUFFER,
+                0,
+                mUniformBufferData.capacity() * BYTES_PER_FLOAT,
+                mUniformBufferData);
+
         GLES30.glBindBuffer(GLES30.GL_UNIFORM_BUFFER, 0);
 
         GLES30.glUseProgram(mProgram);
