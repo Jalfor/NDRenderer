@@ -202,8 +202,9 @@ public abstract class NDShape {
      * Updates the mVertices3d array as a projection of mVertices
      */
     private void updateProjection() {
+        float[] vertex = new float[mDimensions];
+
         for (int vertI = 0; vertI < mVertices.length / mDimensions; vertI++) {  //Vertices
-            float[] vertex = new float[mDimensions];
             System.arraycopy(mVertices, vertI * mDimensions, vertex, 0, mDimensions);
 
             for (int dim = mDimensions - 1; dim > 2; dim--) {    //Dimension we're projecting from

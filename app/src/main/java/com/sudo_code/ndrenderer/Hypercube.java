@@ -166,7 +166,7 @@ public class Hypercube extends NDShape {
 
     /**
      * Updates the mSecondaryData array based on mVertices3d (note that inwards and outwards are
-     * meaningless concepts when with a projection
+     * meaningless concepts when with a projection)
      */
     @Override
     protected void updateSecondaryData() {

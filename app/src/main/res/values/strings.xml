@@ -67,13 +67,12 @@
         problem of overflow as it wraps around (obviously), which I solved using floor functions and
         the remainder operator (% ISTN\'T a modulus operator in Java and I really wish people wouldn\'t
         call it that). Anyway, unfortunately, due to the huge number of vertices and faces on a
-        hypertorus, you can\'t go to as many dimensions, especially when using face sorting for
-        transparency.</string>
+        hypertorus, you can\'t go to as many dimensions. I've limited it to 4.</string>
     <string name="title_activity_complex_graph_help">Complex Graph Help</string>
     <string name="complex_graph_help_text">A \"complex graph\" is a graph that graphs a complex
         function. That is, a function that takes a complex number as an input and outputs a complex
         number for every complex number in its domain. (A complex number is a number of the form
-        a + bi where a and b are real numbers and i is the square root of -1. A complex parabola
+        a + bi where a and b are real numbers and i is the square root of -1.) A complex parabola
         for example, would be (a + bi)^2 = a^2 - b^2 + 2abi. The coloring is based on the real and
         imaginary parts of the derivative as well as its modulus. These are then linearly interpolated
         in 3D space. Of course, this isn\'t precisely accurate for almost all functions, but it would

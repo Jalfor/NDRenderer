@@ -196,6 +196,10 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
             shaders[0] = Utils.genShader(GLES30.GL_VERTEX_SHADER, R.raw.shape_vert, this);
             shaders[1] = Utils.genShader(GLES30.GL_FRAGMENT_SHADER, R.raw.shape_frag, this);
 
+            if (mDimensions > 4) {
+                mDimensions = 4;    //I don't think any phone on the market can manage 5 or more
+            }
+
             mObject = new Hypertorus(mDimensions, mProjectionConstant, 10.f, 0, 1, 10);
         }
 
@@ -242,6 +246,12 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
 
         if (mDimensions > 3) {
             mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[]{2, 3});
+            mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[]{3, 1});
+        }
+
+        if (mDimensions > 4) {
+            mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[]{0, 4});
+            mObject.rotate((float) ((double) mFrameTime / 1000000000.d), new int[]{4, 1});
         }
     }
 
