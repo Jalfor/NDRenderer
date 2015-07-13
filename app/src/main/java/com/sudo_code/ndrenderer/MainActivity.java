@@ -49,7 +49,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
     private String mObjectType;
     private NDShape mObject;    //The thing we're displaying
 
-    private float[]   mModelMatrix; //TODO Stick this into the class probably eventually
+    private float[]   mModelMatrix;
 
     private int mDimensions;
 
@@ -62,7 +62,7 @@ public class MainActivity extends CardboardActivity implements CardboardView.Ste
         mUniformBuffer = uniformBufferArray[0];
 
         mProjectionMatrix = new float[16];
-        Matrix.perspectiveM(mProjectionMatrix, 0, 30.f, 1.f, 0.1f, 100.f);  //TODO: change this in onSurfaceChanged
+        Matrix.perspectiveM(mProjectionMatrix, 0, 30.f, 1.f, 0.1f, 100.f);
         float[] padding = new float[3]; //It needs to be aligned to vec4 because std140
 
         mUniformBufferData = ByteBuffer.allocateDirect(
